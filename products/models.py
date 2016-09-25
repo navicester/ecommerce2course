@@ -2,7 +2,7 @@ from django.db import models
 from django.core.urlresolvers import reverse
 
 from django.db.models.signals import post_save
-
+from django.utils.text import slugify
 
 class ProductQuerySet(models.query.QuerySet):
 	def active(self):
@@ -51,6 +51,23 @@ class Variation(models.Model):
 	def get_absolute_url(self):
 		return self.product.get_absolute_url()
 
+def image_upload_to(instance, filename):
+	title = instance.product.title
+	slug = slugify(title)
+	basename, file_extension = filename.split(".")
+	new_filename = "%s-%s.%s" %(slug, instance.id, file_extension)
+	print title, slug, basename, file_extension, new_filename
+	print instance,filename
+	return "products/%s/%s" %(slug, new_filename)
+
+
+class ProductImage(models.Model):
+	product = models.ForeignKey(Product)
+	image = models.ImageField(upload_to=image_upload_to)
+
+	def __unicode__(self):
+		return self.product.title
+		
 def product_post_saved_receiver(sender, instance, created, *args, **kwargs):
 	product = instance
 	variations = product.variation_set.all()
