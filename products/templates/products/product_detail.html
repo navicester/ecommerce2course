@@ -62,7 +62,8 @@ $(".variation_select").change(function(){
 			{% endif %}
 		</h3>
 	{% endif %}
-	<br/>
+	<br/>	
+	<a href="#">Add to Cart</a>
 	<hr/>
 
 	<p>
@@ -76,6 +77,9 @@ $(".variation_select").change(function(){
 
 
 	<h4>Related Products</h4>
-	<a href="#">Add to Cart</a>
+	{% for product in related %}
+		<a href='{{ product.get_absolute_url }}'>{{product.title}}</a>
+	{% endfor %}
+
 </div>
 {% endblock %}
