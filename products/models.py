@@ -47,7 +47,7 @@ class Product(models.Model):
 		if img:
 			return img.image.url
 		return img #None
-		
+
 class Variation(models.Model):
 	product = models.ForeignKey(Product)
 	title = models.CharField(max_length=120)
