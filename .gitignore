@@ -4,7 +4,7 @@ lib/
 
 
 pip-selfcheck.json
-*.sqlite3
+#*.sqlite3
 .DS_STORE
 .Python
 *.py[cod]
@@ -14,7 +14,7 @@ pip-selfcheck.json
 .settings/
 
 
-static_in_env/
+#static_in_env/
 
 security_setting.py
 settings_security.py

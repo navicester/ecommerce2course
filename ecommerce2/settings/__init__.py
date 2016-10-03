@@ -9,5 +9,5 @@ except:
 if live:
 	from .production import *
 
-print STATIC_ROOT
-print DATABASES['default']
+#print STATIC_ROOT
+#print DATABASES['default']

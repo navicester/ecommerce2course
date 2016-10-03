@@ -26,7 +26,6 @@
 </style>
 
 {% block jumbotron %}
-<!-- {% if not request.user.is_authenticated%} -->
     {% if featured_image %} 
     <div class="jumbotron">
         <div class="container">
@@ -65,7 +64,6 @@
         </div>
     </div>
     {% endif %}
-<!-- {% endif %} -->
 {% endblock %}
 
 {% block content %}
