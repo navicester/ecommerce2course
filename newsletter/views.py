@@ -2,19 +2,23 @@ from django.shortcuts import render
 from django.conf import settings
 from django.core.mail import send_mail
 
+from products.models import ProductFeatured
 from .forms import SignUpForm,ContactForm
 from .models import SignUp
 
 def home(request):    
 
     title = 'Sign Up now'
+    featured_image = ProductFeatured.objects.filter(active=True).order_by("?").first()
+
     form = SignUpForm(request.POST or None)
     context = {
         "title": title,
-        "form": form        
+        "form": form,
+        "featured_image":featured_image,
     }
-    print request
-    print request.POST
+    #print request
+    #print request.POST
     
     if form.is_valid():
         #form.save()

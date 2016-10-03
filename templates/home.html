@@ -12,38 +12,59 @@
 
 .jumbotron {
     background-color: #5ACDFF !important;
-    color : #F5F5F5;
+    /*color : #F5F5F5;*/
+    color : #000;
+    {% if featured_image.make_image_background %} 
+    background-image: url("{{ featured_image.image.url }}");
+    background-repeat: no-repeat;
+    background-color: #000;
+    background-size: cover; /*stretch to adapt screen*/
+    background-position-y: -272px;
+    {% endif %}    
 }
 {% endblock %}
 </style>
 
 {% block jumbotron %}
 {% if not request.user.is_authenticated%}
-<!-- Main component for a primary marketing message or call to action -->
-<div class="jumbotron">
-<div class="container">
-  <div class="row">
-    <div class="col-sm-6">
-        <h1>Try Django1.8</h1>
-        <p>The MVP Landing project is designed to get your project started. The goal is to help you launch as soon as possible with the least amount of investment using time or money. Join Us today.</p>
-        <p>To see the difference between static and fixed top navbars, just scroll.</p>
-        <p>
-          <a class="btn btn-lg btn-primary" href="" role="button">Join us &raquo;</a>
-        </p>
+    {% if featured_image %} 
+    <div class="jumbotron">
+        <div class="container">
+            <div class="row">
+                <div class='{% if featured_image.make_image_background %} col-sm-12 {% else %} col-sm-6 {% endif %} text-center {% if featured_image.text_right %} pull-right {% endif %}'>
+                    <h1>{{ featured_image.product.title }}</h1>
+                    <p>{{ featured_image.product.description }}</p>
+                    <p>
+                        <a class="btn btn-lg btn-primary" href="{{ featured_image.product.get_absolute_url }}" role="button">More Details &raquo;</a>
+                    </p>
+                </div>
+                {% if not featured_image.make_image_background %} 
+                <div class='col-sm-6'>
+                    <img src="{{ featured_image.image.url }}" class="img-responsive" />
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>    
+    {% else %}
+    <div class="jumbotron">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h1>Try Django1.8</h1>
+                    <p>The MVP Landing project is designed to get your project started. The goal is to help you launch as soon as possible with the least amount of investment using time or money. Join Us today.</p>
+                    <p>To see the difference between static and fixed top navbars, just scroll.</p>
+                    <p>
+                        <a class="btn btn-lg btn-primary" href="" role="button">Join us &raquo;</a>
+                    </p>
+                </div>
+                <div class='col-sm-6 video'>
+                    <embed width="560" height="315"  src="http://player.youku.com/player.php/Type/Folder/Fid/26679028/Ob/1/sid/XMTQ2Nzg5NjM4NA==/v.swf" quality="high" width="480" height="400" align="middle" allowScriptAccess="always" allowFullScreen="true" mode="transparent" type="application/x-shockwave-flash"></embed>
+                </div>
+            </div>
+        </div>
     </div>
-<!--     <div class="col-sm-6" style="background-color:black;min-height:300px;"> -->
-          <!--
-          <div class='col-sm-6' >
-                <iframe width="560" height="315" src="http://v.youku.com/v_show/id_XMTQyMjMzNjQ2OA==.html" frameborder="0" allowfullscreen></iframe>
-          </div>
-          -->
-          <div class='col-sm-6 video'>
-              <embed width="560" height="315"  src="http://player.youku.com/player.php/Type/Folder/Fid/26679028/Ob/1/sid/XMTQ2Nzg5NjM4NA==/v.swf" quality="high" width="480" height="400" align="middle" allowScriptAccess="always" allowFullScreen="true" mode="transparent" type="application/x-shockwave-flash"></embed>
-          </div>
-    </div>
-  </div>
-</div>
-</div>
+    {% endif %}
 {% endif %}
 {% endblock %}
 
