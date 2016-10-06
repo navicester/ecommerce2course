@@ -26,6 +26,7 @@ $(".item-qty").change(function(){
 				$("#item-line-total-"+item).text(data.line_total);
 				$("#subtotal").text(data.subtotal);
 			}
+			showFlashMessage("cart updated");
 		}, 
 		error: function(response, error) {
 			// console.log(response)
