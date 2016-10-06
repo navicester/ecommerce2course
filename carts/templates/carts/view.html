@@ -11,7 +11,7 @@ $(".item-qty").change(function(){
 
 {% block content %}
 <table class='table'> 
-{% for item in object.cartitem_set.all %}
+	{% for item in object.cartitem_set.all %}
 	<tr id='item-{{ item.item.id }}'>
 		<form action="." method="GET">
 		<td>{{ item.item.get_title }}</td>
@@ -21,6 +21,10 @@ $(".item-qty").change(function(){
 		<td class='text-right' ><a href='{{ item.remove }}'>X</a></td>
 		</form>
 	</tr>
-{% endfor %}
+	{% endfor %}
+
+	<tr>
+		<td  colspan='4' class='text-right'>Subtotal: <span id='subtotal'>{{ object.subtotal }}</span></td>
+	</tr>
 </table>
 {% endblock %}
