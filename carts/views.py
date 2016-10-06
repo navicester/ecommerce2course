@@ -45,11 +45,25 @@ class CartView(SingleObjectMixin, View):
 			else:
 				cart_item.quantity = qty
 				cart_item.save()
+			if not request.is_ajax():
+				return HttpResponseRedirect(reverse("cart"))
+				#return cart_item.cart.get_absolute_url()
 
 		if request.is_ajax():
+			try:
+				total = cart_item.line_item_total
+			except:
+				total = None
+			try:
+				subtotal = cart_item.cart.subtotal
+			except:
+				subtotal = None
+
 			data = {
 					"deleted": delete_item, 
 					"item_added": item_added,
+					"line_total": total,
+					"subtotal": subtotal,					
 					}
 
 			return JsonResponse(data) 
