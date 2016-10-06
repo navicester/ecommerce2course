@@ -76,6 +76,16 @@ class Variation(models.Model):
 	def get_absolute_url(self):
 		return self.product.get_absolute_url()
 
+	def add_to_cart(self):
+		return "%s?item=%s&qty=1" %(reverse("cart"), self.id) #here cart is url name
+
+	def remove_from_cart(self):
+		return "%s?item=%s&qty=1&delete=True" %(reverse("cart"), self.id)
+
+	def get_title(self):
+		return "%s - %s" %(self.product.title, self.title)
+
+
 def image_upload_to(instance, filename):
 	title = instance.product.title
 	slug = slugify(title)
