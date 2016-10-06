@@ -20,8 +20,32 @@ $(".variation_select").change(function(){
 	setPrice();
 	// var img = $(".variation_select option:selected").attr("data-img")
 	// $("img").attr("src", img);
-
 })
+
+// ajax add to cart
+
+$("#submit-btn").click(function(event){
+	event.preventDefault();
+	var formData = $("#add-form").serialize();
+	console.log(formData);
+	$.ajax({
+		type: "GET", // "POST"
+		url: "{% url 'cart' %}",
+		data: formData,
+		success: function(data) {
+			console.log(data)
+			$("#jquery-message").text("Added " + data.item_added + " Deleted " + data.deleted)
+		}, 
+		error: function(response, error) {
+			// console.log(response)
+			// console.log(error)
+			$("#add-form").submit()
+		}
+	})
+
+	// $("#add-form").submit() # it will go to the next page
+})
+
 {% endblock %}
 </script>
 
@@ -47,7 +71,8 @@ $(".variation_select").change(function(){
 		</p>
 	</div>
 	<div class="col-sm-4">
-	<form id='add-form' method='GET' action="{% url 'cart' %}">
+	<p id='jquery-message' class='lead'>
+	<form id='add-form' method='GET' action="{% url 'cart' %}"> <!-- add form for AJAX -->
 	{% if object.variation_set.count > 1 %}
 		<h3 id='price'>{{ object.variation_set.first.price }}</h3>		
 		<select  name='item' class='form-control variation_select'>    
@@ -69,7 +94,7 @@ $(".variation_select").change(function(){
 	<br/>
 	<input class='form-control' type='number' name='qty' value='1' />
 	<br/>	
-	<input id='submit-btn' type='submit' value='Add to Cart' class='btn btn-default' />
+	<input id='submit-btn' type='submit' value='Add to Cart' class='btn btn-default' />  <!-- submit-btn for AJAX -->
 	</form>
 
 

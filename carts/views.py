@@ -1,5 +1,5 @@
 from django.views.generic.base import View
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.generic.detail import SingleObjectMixin
 
@@ -28,7 +28,8 @@ class CartView(SingleObjectMixin, View):
 	def get(self, request, *args, **kwargs):
 		cart = self.get_object()
 		item_id = request.GET.get('item')
-		delete_item = request.GET.get('delete')
+		delete_item = request.GET.get('delete', False)
+		item_added = False		
 		if item_id:
 			item_instance = get_object_or_404(Variation, id=item_id)
 			qty=request.GET.get('qty', 1)
@@ -44,6 +45,15 @@ class CartView(SingleObjectMixin, View):
 			else:
 				cart_item.quantity = qty
 				cart_item.save()
+
+		if request.is_ajax():
+			data = {
+					"deleted": delete_item, 
+					"item_added": item_added,
+					}
+
+			return JsonResponse(data) 
+
 		#context = self.get_context_data(request, *args, **kwargs)
 		context={
 			"object":self.get_object()
