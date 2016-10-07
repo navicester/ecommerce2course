@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 
-from carts.views import CartView
+from carts.views import CartView, ItemCountView
 
 urlpatterns = [
     # Examples:
@@ -20,7 +20,8 @@ urlpatterns = [
     url(r'^products/', include('products.urls')),
     url(r'^categories/', include('products.urls_categories')),
 
-    url(r'^cart/$', CartView.as_view(), name='cart'),    
+    url(r'^cart/$', CartView.as_view(), name='cart'), 
+    url(r'^cart/count/$', ItemCountView.as_view(), name='item_count'),       
 ]
 
 if settings.DEBUG:
