@@ -35,7 +35,7 @@ $("#submit-btn").click(function(event){
 		success: function(data) {
 			//console.log(data)
 			//$("#jquery-message").text("Added " + data.item_added + " Deleted " + data.deleted)
-			showFlashMessage("product added");
+			showFlashMessage(data.flash_message);
 		}, 
 		error: function(response, error) {
 			// console.log(response)
