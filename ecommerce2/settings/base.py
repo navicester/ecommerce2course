@@ -44,6 +44,7 @@ INSTALLED_APPS = (
 	'newsletter',
     'products',
     'carts',
+    'orders',
     'crispy_forms',
     'registration',
 )
