@@ -22,9 +22,13 @@ $(".item-qty").change(function(){
 			if (data.deleted){
 				$("#item-"+item).fadeOut();
 				$("#subtotal").text(data.subtotal);
+				$("#taxtotal").text(data.tax_total);
+				$("#carttotal").text(data.cart_total);				
 			} else {
 				$("#item-line-total-"+item).text(data.line_total);
 				$("#subtotal").text(data.subtotal);
+				$("#taxtotal").text(data.tax_total);
+				$("#carttotal").text(data.cart_total);				
 			}
 			if (data.total_items == 0 ) {
 				$(".table").fadeOut()
@@ -71,8 +75,15 @@ $(".item-qty").change(function(){
 	{% endfor %}
 
 	<tr>
-		<td  colspan='4' class='text-right'>Subtotal: <span id='subtotal'>{{ object.subtotal }}</span></td> <!-- id for AJAX-->	
+		<td colspan='4' class='text-right'>Subtotal: <span id='subtotal'>{{ object.subtotal }}</span></td> <!-- id for AJAX-->	
 	</tr>
+	<tr>
+		<td colspan='4' class='text-right'>Tax (Estimated): <span id='taxtotal'>{{ object.tax_total }}</span></td>
+	</tr>
+
+	<tr>
+		<td colspan='4' class='text-right'>Total: <span id='carttotal'>{{ object.total }}</span></td>
+	</tr>	
 </table>
 
 {% endif %}
