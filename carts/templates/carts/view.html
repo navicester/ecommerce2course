@@ -26,6 +26,12 @@ $(".item-qty").change(function(){
 				$("#item-line-total-"+item).text(data.line_total);
 				$("#subtotal").text(data.subtotal);
 			}
+			if (data.total_items == 0 ) {
+				$(".table").fadeOut()
+				var template = "{% include 'carts/empty_cart.html' %}";
+				$(".main-content").html(template);
+
+			}			
 			var message = ""
 			if (data.item_added) {
 				message = "New item added"
@@ -48,6 +54,11 @@ $(".item-qty").change(function(){
 </script>
 
 {% block content %}
+<div class='row main-content'>
+{% if object.cartitem_set.count < 1 %}
+	{% include "carts/empty_cart.html" %}
+{% else %}
+
 <table class='table'> 
 	{% for item in object.cartitem_set.all %}
 	<tr id='item-{{ item.item.id }}'>	<!-- id for AJAX-->	
@@ -62,4 +73,8 @@ $(".item-qty").change(function(){
 		<td  colspan='4' class='text-right'>Subtotal: <span id='subtotal'>{{ object.subtotal }}</span></td> <!-- id for AJAX-->	
 	</tr>
 </table>
+
+{% endif %}
+</div>
+
 {% endblock %}
