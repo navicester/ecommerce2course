@@ -4,16 +4,13 @@
 
 {% block content %}
 
-<div class='col-sm-6'>
-	<form method='POST' action=''>{% csrf_token %}
-		{{ form|crispy }}
-		<input type='submit' class='btn btn-success' value='Continue as Guest' />
-		</form>
-</div>
-
 {% if not user_can_continue %}
 <div class='col-sm-6'>
 	<p class='lead'>Continue as Guest</p>
+	<form method='POST' action=''>{% csrf_token %} <!-- this POST will go to checkout view -->
+		{{ form|crispy }}
+		<input type='submit' class='btn btn-success' value='Continue as Guest' />
+		</form>	
 </div>
 
 <div class='col-sm-6'>

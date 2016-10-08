@@ -61,11 +61,11 @@
                     </div>
                     <button type='submit' class='btn btn-default'>Login</button>
                   </form>
-                  <p class="text-center"><a href="{% url 'auth_login' %}">Forget Password</a></p>
+                  <p class="text-center"><a href="{% url 'auth_password_reset' %}">Forget Password</a></p>
                 </ul>
               </li>
               {% endif %}            
-              <li><a href="{% url 'auth_login' %}">Login</a></li>
+              <!-- <li><a href="{% url 'auth_login' %}">Login</a></li> -->
             {% endif %}
           </ul>
 
