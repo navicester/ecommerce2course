@@ -21,12 +21,15 @@ class AddressSelectFormView(FormView):
 				user__email=self.request.user.email,
 				type='shipping',
 			)
-		print self.request.user.email
+
 		return form
 
 	def form_valid(self, form, *args, **kwargs):
-		form = super(AddressSelectFormView, self).form_valid(form, *args, **kwargs)
-		return form
+		billing_address = form.cleaned_data["billing_address"]
+		shipping_address = form.cleaned_data["shipping_address"]
+		self.request.session["billing_address"] = billing_address.id
+		self.request.session["shipping_address"] = shipping_address.id
+		return super(AddressSelectFormView, self).form_valid(form, *args, **kwargs)
 
 	def get_success_url(self, *args, **kwargs):
 		return "/checkout/"
