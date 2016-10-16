@@ -30,16 +30,6 @@ class CartView(SingleObjectMixin, View):
 	model = Cart
 	template_name = "carts/view.html"
 
-	def get_order(self, *args, **kwargs):
-		cart = self.get_cart()
-		new_order_id = self.request.session.get("order_id")
-		if new_order_id is None:
-			new_order = Order.objects.create(cart=cart)
-			self.request.session["order_id"] = new_order.id
-		else:
-			new_order = Order.objects.get(id=new_order_id)
-		return new_order
-
 	def get_object(self, *args, **kwargs):
 		self.request.session.set_expiry(0)
 		cart_id = self.request.session.get("cart_id")
@@ -132,6 +122,16 @@ class CheckoutView(FormMixin, DetailView):
 	template_name = "carts/checkout_view.html"
 	form_class = GuestCheckoutForm
 
+	def get_order(self, *args, **kwargs):
+		cart = self.get_object()
+		new_order_id = self.request.session.get("order_id")
+		if new_order_id is None:
+			new_order = Order.objects.create(cart=cart)
+			self.request.session["order_id"] = new_order.id
+		else:
+			new_order = Order.objects.get(id=new_order_id)
+		return new_order
+
 	def get_object(self, *args, **kwargs):
 		cart_id = self.request.session.get("cart_id")
 		if cart_id == None:
@@ -157,6 +157,7 @@ class CheckoutView(FormMixin, DetailView):
 			user_checkout.save()
 			self.request.session["user_checkout_id"] = user_checkout.id			
 
+		context["order"] = self.get_order()
 		context["user_can_continue"] = user_can_continue
 		context["form"] = self.get_form()
 
