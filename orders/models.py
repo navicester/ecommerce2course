@@ -1,3 +1,5 @@
+from decimal import Decimal
+from django.db.models.signals import pre_save, post_save
 from django.conf import settings
 from django.db import models
 
@@ -39,8 +41,13 @@ class Order(models.Model):
 	def __unicode__(self):
 		return str(self.cart.id)
 
+def order_pre_save(sender, instance, *args, **kwargs):
+	shipping_total_price = instance.shipping_total_price
+	cart_total = instance.cart.total
+	order_total = Decimal(shipping_total_price) + Decimal(cart_total)
+	instance.order_total = order_total
 
-
+pre_save.connect(order_pre_save, sender=Order)
 
 
 
