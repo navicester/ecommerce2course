@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 
 from django.views.generic.edit import FormView, CreateView
 from .forms import AddressForm, UserAddressForm
-
+from .mixins import CartOrderMixin
 from .models import UserAddress, UserCheckout
 
 # Create your views here.
@@ -22,7 +22,7 @@ class UserAddressCreateView(CreateView):
 		form.instance.user = self.get_checkout_user()
 		return super(UserAddressCreateView, self).form_valid(form, *args, **kwargs)
 
-class AddressSelectFormView(FormView):
+class AddressSelectFormView(CartOrderMixin, FormView):
 	form_class = AddressForm
 	template_name = "orders/address_select.html"
 
@@ -67,8 +67,10 @@ class AddressSelectFormView(FormView):
 	def form_valid(self, form, *args, **kwargs):
 		billing_address = form.cleaned_data["billing_address"]
 		shipping_address = form.cleaned_data["shipping_address"]
-		self.request.session["billing_address"] = billing_address.id
-		self.request.session["shipping_address"] = shipping_address.id
+		order = self.get_order()
+		order.billing_address = billing_address
+		order.shipping_address = shipping_address
+		order.save()
 		return super(AddressSelectFormView, self).form_valid(form, *args, **kwargs)
 
 	def get_success_url(self, *args, **kwargs):

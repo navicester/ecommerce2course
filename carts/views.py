@@ -7,6 +7,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.views.generic.edit import FormMixin
 
 from orders.forms import GuestCheckoutForm
+from orders.mixins import CartOrderMixin
 from orders.models import UserCheckout, Order, UserAddress
 from products.models import Variation
 from .models import Cart, CartItem
@@ -117,7 +118,7 @@ class CartView(SingleObjectMixin, View):
 		template = self.template_name
 		return render(request, template, context)
 
-class CheckoutView(FormMixin, DetailView):	
+class CheckoutView(CartOrderMixin, FormMixin, DetailView):	
 	model = Cart
 	template_name = "carts/checkout_view.html"
 	form_class = GuestCheckoutForm
@@ -133,11 +134,10 @@ class CheckoutView(FormMixin, DetailView):
 		return new_order
 
 	def get_object(self, *args, **kwargs):
-		cart_id = self.request.session.get("cart_id")
-		if cart_id == None:
+		cart = self.get_cart()
+		if cart == None:
 			return None
-		cart = Cart.objects.get(id=cart_id)
-		return cart		
+		return cart
 
 	def get_context_data(self, *args, **kwargs):
 		context = super(CheckoutView, self).get_context_data(*args, **kwargs)		
@@ -182,22 +182,26 @@ class CheckoutView(FormMixin, DetailView):
 	def get(self, request, *args, **kwargs):
 		get_data = super(CheckoutView, self).get(request, *args, **kwargs)
 		cart = self.get_object()
+		if cart == None:
+			return redirect("cart")		
 		new_order = self.get_order()
 		user_checkout_id = request.session.get("user_checkout_id")		
 		
 		if user_checkout_id != None:
 			user_checkout = UserCheckout.objects.get(id=user_checkout_id)
-			billing_address_id = self.request.session.get("billing_address")
-			shipping_address_id = self.request.session.get("shipping_address")
-
-			if billing_address_id == None or shipping_address_id == None:
+			if new_order.billing_address == None or new_order.shipping_address == None:
 			 	return redirect("order_address")
-			else:
-				billing_address = UserAddress.objects.get(id=billing_address_id)
-				shipping_address = UserAddress.objects.get(id=shipping_address_id)
-
 			new_order.user = user_checkout
-			new_order.billing_address = billing_address
-			new_order.shipping_address = shipping_address
 			new_order.save()
 		return get_data		
+
+class CheckoutFinalView(CartOrderMixin, View):
+	def post(self, request, *args, **kwargs):
+		order = self.get_order()
+		if request.POST.get("payment_token") == "ABC":
+			print order.cart.items.all()
+		return redirect("checkout")		
+
+	def get(self, request, *args, **kwargs):
+		return redirect("checkout")
+		
