@@ -123,16 +123,6 @@ class CheckoutView(CartOrderMixin, FormMixin, DetailView):
 	template_name = "carts/checkout_view.html"
 	form_class = GuestCheckoutForm
 
-	def get_order(self, *args, **kwargs):
-		cart = self.get_object()
-		new_order_id = self.request.session.get("order_id")
-		if new_order_id is None:
-			new_order = Order.objects.create(cart=cart)
-			self.request.session["order_id"] = new_order.id
-		else:
-			new_order = Order.objects.get(id=new_order_id)
-		return new_order
-
 	def get_object(self, *args, **kwargs):
 		cart = self.get_cart()
 		if cart == None:
@@ -199,9 +189,10 @@ class CheckoutFinalView(CartOrderMixin, View):
 	def post(self, request, *args, **kwargs):
 		order = self.get_order()
 		if request.POST.get("payment_token") == "ABC":
-			print order.cart.items.all()
+			order.mark_completed()
+			del request.session["cart_id"]
+			del request.session["order_id"]
 		return redirect("checkout")		
 
 	def get(self, request, *args, **kwargs):
 		return redirect("checkout")
-		

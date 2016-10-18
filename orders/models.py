@@ -31,8 +31,14 @@ class UserAddress(models.Model):
 
 	def get_address(self):
 		return "%s, %s, %s %s" %(self.street, self.city, self.state, self.zipcode)
-		
+
+ORDER_STATUS_CHOICES = (
+	('created', 'Created'),
+	('completed', 'Completed'),
+)
+
 class Order(models.Model):
+	status = models.CharField(max_length=120, choices=ORDER_STATUS_CHOICES, default='created')	
 	cart = models.ForeignKey(Cart)
 	user = models.ForeignKey(UserCheckout, null=True)
 	billing_address = models.ForeignKey(UserAddress, related_name='billing_address', null=True)
@@ -42,6 +48,10 @@ class Order(models.Model):
 
 	def __unicode__(self):
 		return str(self.cart.id)
+
+	def mark_completed(self, order_id=None):
+		self.status = "completed"
+		self.save()
 
 def order_pre_save(sender, instance, *args, **kwargs):
 	shipping_total_price = instance.shipping_total_price
