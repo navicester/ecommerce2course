@@ -5,6 +5,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic.detail import SingleObjectMixin, DetailView
 from django.contrib.auth.forms import AuthenticationForm
 from django.views.generic.edit import FormMixin
+from django.contrib import messages
 
 from orders.forms import GuestCheckoutForm
 from orders.mixins import CartOrderMixin
@@ -190,9 +191,10 @@ class CheckoutFinalView(CartOrderMixin, View):
 		order = self.get_order()
 		if request.POST.get("payment_token") == "ABC":
 			order.mark_completed()
+			messages.success(request, "Thank you for your order.")
 			del request.session["cart_id"]
 			del request.session["order_id"]
-		return redirect("checkout")		
+		return redirect("order_detail", pk=order.pk)
 
 	def get(self, request, *args, **kwargs):
 		return redirect("checkout")

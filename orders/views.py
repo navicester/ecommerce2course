@@ -9,6 +9,23 @@ from .mixins import CartOrderMixin, LoginRequiredMixin
 from .models import UserAddress, UserCheckout, Order
 
 # Create your views here.
+class OrderDetail(DetailView):
+	model = Order
+
+	def dispatch(self, request, *args, **kwargs):
+		try:
+			user_check_id = self.request.session.get("user_checkout_id")
+			user_checkout = UserCheckout.objects.get(id=user_check_id)
+		except UserCheckout.DoesNotExist:
+			user_checkout = UserCheckout.objects.get(user=request.user)
+		except:
+			user_checkout = None
+
+		obj = self.get_object()
+		if obj.user == user_checkout and user_checkout is not None:
+			return super(OrderDetail, self).dispatch(request, *args, **kwargs)
+		else:
+			raise Http404
 
 class OrderList(LoginRequiredMixin, ListView):
 	queryset = Order.objects.all()
