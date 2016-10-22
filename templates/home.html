@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 {% load staticfiles %}
 
-{% block head_title %}Welcome | {% endblock %}
+{% block head_title %}Welcome | {{ block.super }} {% endblock %}
 
 <style>
 {% block style %}
@@ -39,7 +39,7 @@
                 </div>
                 {% if not featured_image.make_image_background %} 
                 <div class='col-sm-6'>
-                    <img src="{{ featured_image.image.url }}" class="img-responsive" />
+                    <img src="{{ featured_image.image.url }}" class='img-responsive' />
                 </div>
                 {% endif %}
             </div>
@@ -49,10 +49,9 @@
     <div class="jumbotron">
         <div class="container">
             <div class="row">
-                <div class="col-sm-6">
+                <div class='col-sm-6'>
                     <h1>Try Django1.8</h1>
                     <p>The MVP Landing project is designed to get your project started. The goal is to help you launch as soon as possible with the least amount of investment using time or money. Join Us today.</p>
-                    <p>To see the difference between static and fixed top navbars, just scroll.</p>
                     <p>
                         <a class="btn btn-lg btn-primary" href="" role="button">Join us &raquo;</a>
                     </p>
@@ -67,14 +66,14 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
+<div class= 'row'>
 <h3>Recommended Products</h3>
-{% include 'products/products.html' with object_list=products col_class_set="col-sm-2" %}
+{% include "products/products.html" with object_list=products col_class_set="col-sm-2" %}
 </div>
 
-<div class="row">
+<div class='row'>
 <h3>Featured Products</h3>
-{% include 'products/products.html' with object_list=products2 %}
+{% include "products/products.html" with object_list=products2 %}
 </div>
 
 <!-- {% if request.user.is_authenticated%}

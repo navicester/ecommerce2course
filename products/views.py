@@ -1,17 +1,19 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.db.models import Q
+from django.http import Http404
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
-from django.http import Http404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from django.db.models import Q
-from django.contrib import messages
 
-from .models import Product, Variation, Category
-from .forms import VariationInventoryFormSet, ProductFilterForm
-from .mixins import StaffRequiredMixin
 
 from django_filters import FilterSet, CharFilter, NumberFilter
 # Create your views here.
+from .forms import VariationInventoryFormSet, ProductFilterForm
+from .mixins import StaffRequiredMixin
+
+from .models import Product, Variation, Category
+
 
 class CategoryListView(ListView):
     model = Category
@@ -156,7 +158,7 @@ class ProductDetailView(DetailView):
         return context
 
 def product_detail_view_func(request, id):
-    print "coming"
+    #print "coming"
     #product_instance = Product.objects.get(id=id)
     product_instance = get_object_or_404(Product, id=id)
     try:

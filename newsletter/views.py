@@ -1,6 +1,7 @@
-from django.shortcuts import render
+
 from django.conf import settings
 from django.core.mail import send_mail
+from django.shortcuts import render
 
 from products.models import ProductFeatured,Product
 from .forms import SignUpForm,ContactForm
@@ -10,8 +11,8 @@ def home(request):
 
     title = 'Sign Up now'
     featured_image = ProductFeatured.objects.filter(active=True).order_by("?").first()
-    products = Product.objects.all().order_by('?')[:6]
-    products2 = Product.objects.all().order_by('?')[:6]
+    products = Product.objects.all().order_by("?")[:6]
+    products2 = Product.objects.all().order_by("?")[:6]
 
     form = SignUpForm(request.POST or None)
     context = {

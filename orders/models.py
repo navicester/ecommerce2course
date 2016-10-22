@@ -1,9 +1,9 @@
 from decimal import Decimal
-from django.db.models.signals import pre_save, post_save
+
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
-
+from django.db.models.signals import pre_save, post_save
 from carts.models import Cart
 
 # Create your models here.
@@ -12,7 +12,13 @@ class UserCheckout(models.Model):
 	email = models.EmailField(unique=True) #--> required
 
 	def __unicode__(self): #def __str__(self):
-		return self.email	
+		return self.email
+
+	def admin_user_id(self):
+		if self.user:
+			return str(self.user.id)
+		else:
+			return "None" 
 
 ADDRESS_TYPE = (
 	('billing', 'Billing'),

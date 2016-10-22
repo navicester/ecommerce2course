@@ -1,11 +1,13 @@
-from django.views.generic.base import View
+from django.contrib import messages
+from django.contrib.auth.forms import AuthenticationForm
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.views.generic.base import View
 from django.views.generic.detail import SingleObjectMixin, DetailView
-from django.contrib.auth.forms import AuthenticationForm
+
 from django.views.generic.edit import FormMixin
-from django.contrib import messages
+
 
 from orders.forms import GuestCheckoutForm
 from orders.mixins import CartOrderMixin
@@ -49,13 +51,13 @@ class CartView(SingleObjectMixin, View):
 
 	def get(self, request, *args, **kwargs):
 		cart = self.get_object()
-		item_id = request.GET.get('item')
-		delete_item = request.GET.get('delete', False)
+		item_id = request.GET.get("item")
+		delete_item = request.GET.get("delete", False)
 		flash_message = ""		
 		item_added = False		
 		if item_id:
 			item_instance = get_object_or_404(Variation, id=item_id)
-			qty=request.GET.get('qty', 1)
+			qty=request.GET.get("qty", 1)
 			try:
 				if int(qty) < 1:
 					delete_item = True

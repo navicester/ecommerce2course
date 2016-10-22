@@ -1,6 +1,5 @@
-from django.db import models
 from django.core.urlresolvers import reverse
-
+from django.db import models
 from django.db.models.signals import post_save
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
@@ -86,23 +85,7 @@ class Variation(models.Model):
 		return "%s - %s" %(self.product.title, self.title)
 
 
-def image_upload_to(instance, filename):
-	title = instance.product.title
-	slug = slugify(title)
-	basename, file_extension = filename.split(".")
-	new_filename = "%s-%s.%s" %(slug, instance.id, file_extension)
-	print title, slug, basename, file_extension, new_filename
-	print instance,filename
-	return "products/%s/%s" %(slug, new_filename)
 
-
-class ProductImage(models.Model):
-	product = models.ForeignKey(Product)
-	image = models.ImageField(upload_to=image_upload_to)
-
-	def __unicode__(self):
-		return self.product.title
-		
 def product_post_saved_receiver(sender, instance, created, *args, **kwargs):
 	product = instance
 	variations = product.variation_set.all()
@@ -116,6 +99,23 @@ def product_post_saved_receiver(sender, instance, created, *args, **kwargs):
 
 post_save.connect(product_post_saved_receiver, sender=Product)
 
+def image_upload_to(instance, filename):
+	title = instance.product.title
+	slug = slugify(title)
+	basename, file_extension = filename.split(".")
+	new_filename = "%s-%s.%s" %(slug, instance.id, file_extension)
+	#print title, slug, basename, file_extension, new_filename
+	#print instance,filename
+	return "products/%s/%s" %(slug, new_filename)
+
+
+class ProductImage(models.Model):
+	product = models.ForeignKey(Product)
+	image = models.ImageField(upload_to=image_upload_to)
+
+	def __unicode__(self):
+		return self.product.title
+		
 class Category(models.Model):
 	title = models.CharField(max_length=120, unique=True)
 	slug = models.SlugField(unique=True)

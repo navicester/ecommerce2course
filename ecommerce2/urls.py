@@ -1,11 +1,17 @@
-from django.conf.urls import include, url
-from django.contrib import admin
+
+
 
 from django.conf import settings
+from django.conf.urls import include, url
 from django.conf.urls.static import static
+from django.contrib import admin
 
 from carts.views import CartView, ItemCountView, CheckoutView, CheckoutFinalView
-from orders.views import AddressSelectFormView, UserAddressCreateView, OrderList, OrderDetail
+from orders.views import (
+                    AddressSelectFormView, 
+                    UserAddressCreateView, 
+                    OrderList, 
+                    OrderDetail)
 
 urlpatterns = [
     # Examples:
