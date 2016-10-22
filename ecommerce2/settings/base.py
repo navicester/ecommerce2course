@@ -47,6 +47,7 @@ INSTALLED_APPS = (
     'orders',
     'crispy_forms',
     'registration',
+    'django_filters'
 )
 
 MIDDLEWARE_CLASSES = (
