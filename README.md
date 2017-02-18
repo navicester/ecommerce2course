@@ -264,7 +264,7 @@ get_context_data(**kwargs)¶
 	•	context_object_name: self.object will also be stored under the name returned byget_context_object_name(), which defaults to the lowercased version of the model name.
 </pre>
 
-class django.views.generic.list.ListView¶
+class django.views.generic.list.ListView
 <pre>
 A page representing a list of objects.
 While this view is executing, self.object_list will contain the list of objects (usually, but not necessarily a queryset) that the view is operating upon.
