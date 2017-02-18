@@ -88,16 +88,16 @@ git push -u origin master
 
 # 007 Product App
 添加Product application
--	创建app `python manage.py startapp *app_name*`
--	定义Product类 (Model)
--	在settings里的INSTALLED_APPS添加这个新加的APP
--	添加Admin接口
+- 创建app `python manage.py startapp *app_name*`
+- 定义Product类 (Model)
+- 在settings里的INSTALLED_APPS添加这个新加的APP
+- 添加Admin接口
 
 之后会实现各个子功能
--	DetaiView
-	- 008 定义ProductDetailView (View)
-	- 009 添加ProductDetailView入口 (url)
-	- 010 实现模板 (template)
+- DetaiView
+ - 008 定义ProductDetailView (View)
+ - 009 添加ProductDetailView入口 (url)
+ - 010 实现模板 (template)
 -	ListView
 	- 011 添加ProductListView (View), 模板(template), 入口 (url)
 	- 012 模板里添加直接访问Model实例的链接 (get_absolute_url)
