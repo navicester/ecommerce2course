@@ -349,6 +349,169 @@ def product_detail_view_func(request, id):
 	return render(request, template, context)
 ```
 
+# 011 ListView
+https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-display/#listview
+
+ProductListView实现
+- 添加入口 (url), **ListView.as_view()
+- 添加ProductListView，从ListView继承
+- 添加模板
+
+更新products.urls
+``` python
+-from .views import ProductDetailView
++from .views import ProductDetailView, ProductListView
+
+urlpatterns = [
+    # Examples:
++    url(r'^$', ProductListView.as_view(), name='products'),
+]
+```
+访问地址
+http://127.0.0.1:8000/products/
+
+更新products.views，添加listview的处理
+``` python
+from django.views.generic.list import ListView
+from django.utils import timezone
+
+class ProductListView(ListView):
+    model = Product
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(ProductListView, self).get_context_data(*args, **kwargs)
+        context["now"] = timezone.now()
+        return context
+```
+
+添加*products/templates/products/product_list.html*
+``` html
+{% extends "base.html" %}
+
+{% block content %}
+
+<table>
+	{% for object in object_list %}
+	<tr>
+		<td>{{object.title}}</td>
+	</tr>
+	{% endfor %}
+
+</table>
+{% endblock %}
+```
+
+# 012 Using Links for Model Instance
+
+实现：模板里添加直接访问Model实例的链接 (get_absolute_url)
+
+*Products/templates/products/product_list.html*
+``` html
+<td><a href="/products/{{object.pk}}/">{{object.title}}</a></td>
+<td><a href="{% url 'product_detail' pk=object.pk %}">{{object.title}}</a></td>
+```
+
+可以用下面的方式
+``` html
+<td><a href="{{ object.get_absolute_url }}">{{object.title}}</a></td>
+```
+
+更新models
+``` python
+from django.core.urlresolvers import reverse
+
+class Product(models.Model):
+
+	def get_absolute_url(self):
+		return reverse("product_detail", kwargs={"pk": self.pk})
+```
+
+# 013 Model Manager
+
+实现：定制化model queryset, 过滤model里面的一些objects
+
+https://docs.djangoproject.com/en/1.10/topics/db/managers/
+
+Model里添加Model Manager
+``` python
+class ProductQuerySet(models.query.QuerySet):
+	def active(self):
+		return self.filter(active=True)
+
+
+class ProductManager(models.Manager):
+	def get_queryset(self):
+		return ProductQuerySet(self.model, using=self._db)
+
+	def all(self, *args, **kwargs):
+		return self.get_queryset().active()
+
+class Product(models.Model):
+	title = models.CharField(max_length=120)
+	description = models.TextField(blank=True, null=True)
+	price = models.DecimalField(decimal_places=2, max_digits=20)
+	active = models.BooleanField(default=True)
+
++	objects = ProductManager()
+```
+
+view里更新queryset
+``` python
+class ProductListView(ListView):
+    model = Product
++    queryset = Product.objects.all()
+```
+
+# 014 Product Variation
+实现：添加产品型号
+- 定义Variation (model)
+- 添加admin接口
+- 更新模板，添加Variation选项
+
+添加类variation，文件products.models
+``` python
+class Variation(models.Model):
+	product = models.ForeignKey(Product)
+	title = models.CharField(max_length=120)
+	price = models.DecimalField(decimal_places=2, max_digits=20)
+	sale_price = models.DecimalField(decimal_places=2, max_digits=20, null=True, blank=True)
+	active = models.BooleanField(default=True)
+	inventory = models.IntegerField(null=True, blank=True) #refer none == unlimited amount
+
+	def __unicode__(self):
+		return self.title
+
+	def get_price(self):
+		if self.sale_price is not None:
+			return self.sale_price
+		else:
+			return self.price
+
+	def get_absolute_url(self):
+		return self.product.get_absolute_url()
+```
+
+添加admin接口
+``` python
+from .models import Variation
+admin.site.register(Variation)
+```
+
+更新ProductDetail
+``` html
+<select class='form-control'>
+	{% for vari_obj in object.variation_set.all %}
+	<option value = "{{vari_obj.id}}">
+		{{vari_obj}}
+	</option>
+	{% endfor %}
+</select>
+```
+
+更新一些css符合commerce的风格
+
+
+
 
 
 
