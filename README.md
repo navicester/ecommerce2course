@@ -204,12 +204,13 @@ Generic display views
 While this view is executing, `self.object` will contain the object that the view is operating upon.
 
 This view inherits methods and attributes from the following views:
-> 
+<pre>
 •	django.views.generic.detail.SingleObjectTemplateResponseMixin
 •	django.views.generic.base.TemplateResponseMixin
 •	django.views.generic.detail.BaseDetailView
 •	django.views.generic.detail.SingleObjectMixin
 •	django.views.generic.base.View
+</pre>
 
 **Method Flowchart**
 1.	dispatch()
