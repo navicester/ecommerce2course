@@ -167,6 +167,46 @@ from .models import Product
 admin.site.register(Product)
 ```
 
+# 008 Product Detail View
+创建Product Detail View,包含
+- 从DetailView继承，并设置model
+- 指定template/context, 并渲染render
+
+更新products.views，创建ProductDetailView，并指定template和context （测试用）
+``` python
+from django.views.generic.detail import DetailView
+from .models import Product
+
+# Create your views here.
+class ProductDetailView(DetailView):
+	model = Product
+
+def product_detail_view_func(request, id):
+	product_instance = Product.objects.get(id=id)
+
+	template = "products/product_detail.html"
+	context = {	
+		"object": product_instance
+	}
+	return render(request, template, context)
+```
+http://127.0.0.1:8000/products/1/
+
+## 参考
+https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-display/#detailview
+
+Generic display views
+- DetailView
+- ListView
+
+**class django.views.generic.detail.DetailView**
+While this view is executing, `self.object` will contain the object that the view is operating upon.
+This view inherits methods and attributes from the following views:
+•	django.views.generic.detail.SingleObjectTemplateResponseMixin
+•	django.views.generic.base.TemplateResponseMixin
+•	django.views.generic.detail.BaseDetailView
+•	django.views.generic.detail.SingleObjectMixin
+•	django.views.generic.base.View
 
 
 
