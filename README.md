@@ -264,7 +264,7 @@ get_context_data(**kwargs)
 	•	context_object_name: self.object will also be stored under the name returned byget_context_object_name(), which defaults to the lowercased version of the model name.
 </pre>
 
-class django.views.generic.list.ListView
+[class django.views.generic.list.ListView](https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-display/#django.views.generic.list.ListView)
 <pre>
 A page representing a list of objects.
 While this view is executing, self.object_list will contain the list of objects (usually, but not necessarily a queryset) that the view is operating upon.
@@ -286,6 +286,69 @@ Method Flowchart
 7.	get()
 8.	render_to_response()
 </pre>
+
+# 009 url with django app
+实现DetailView的显示，其通过测试函数分解其功能
+
+https://github.com/codingforentrepreneurs/Guides/blob/master/all/common_url_regex.md
+
+在ecommerce2.url添加入口
+``` python
+    url(r'^products/', include('products.urls')),       
+```
+
+新建文件products.url
+其中, `as_view`将class based view转换为function based view
+`P<id>`这个跟view里面的参数是一致的
+``` python
+from django.conf import settings
+from django.conf.urls import include, url
+from django.conf.urls.static import static
+from django.contrib import admin
+
+from .views import ProductDetailView
+
+urlpatterns = [
+    # Examples:
+    url(r'^(?P<pk>\d+)/$', ProductDetailView.as_view(), name='product_detail'),
+    #url(r'^(?P<id>\d+)', 'products.views.product_detail_view_func', name='product_detail_function'),
+]
+```
+
+# 010 Add html templates
+创建*products/templates/products/product_detail.htnl*
+
+DetailView的默认名字是`template_name = "<appname>/<modelname>_detail.html"`
+
+可以通过更新这个名字来修改template位置
+
+http://127.0.0.1:8000/products/1/
+可以访问刚刚创建的product
+
+如果访问的数据越界了，需要做一些处理
+``` python
+-from django.shortcuts import render
++from django.shortcuts import render, get_object_or_404
++from django.http import Http404
+
+def product_detail_view_func(request, id):
+-    product_instance = Product.objects.get(id=id)
++	product_instance = get_object_or_404(Product, id=id)
++	try:
+		product_instance = Product.objects.get(id=id)
++	except Product.DoesNotExist:
++		raise Http404
++	except:
++		raise Http404
+
+	template = "products/product_detail.html"
+	context = {	
+		"object": product_instance
+	}
+
+	return render(request, template, context)
+```
+
 
 
 
