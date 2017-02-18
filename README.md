@@ -98,14 +98,15 @@ git push -u origin master
  - 008 定义ProductDetailView (View)
  - 009 添加ProductDetailView入口 (url)
  - 010 实现模板 (template)
--	ListView
+
+- ListView
  - 011 添加ProductListView (View), 模板(template), 入口 (url)
  - 012 模板里添加直接访问Model实例的链接 (get_absolute_url)
  - 013 定制Model queryset (Model Manager)
--	Variation
+- Variation
  - 014 定义Variation (model)，添加admin，更新Product模板添加Variation选项(template)
  - 015 Product保存时，如果没有型号，则添加一个默认型号 (Post Save)
--	Product Vew Layout
+- Product Vew Layout
  - 016 分为两列，左边(`col-sm-8`)显示title，description，右边显示Variation
  - 017 图片上传功能 (image)
  - 018 搜索功能 (search)
@@ -116,10 +117,13 @@ git push -u origin master
  - 023 动态更新价格 (Jquery)
 
 
-
+创建app
+``` dos
 >python manage.py startapp product
+```
 
 在products.models添加product类
+``` python
 from django.db import models
 
 # Create your models here.
@@ -131,8 +135,10 @@ class Product(models.Model):
 
 	def __unicode__(self): #def __str__(self):
 		return self.title
+```
 
 settings里添加products
+``` python
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -146,16 +152,20 @@ INSTALLED_APPS = (
     'crispy_forms',
     'registration',
 )
-
+```
+数据库迁移
+``` dos
 >python manage.py makemigrations
 >python manage.py migrate
+```
 
-添加admin接口. products.admin.py
+添加admin接口. `products.admin.py`
+``` python
 from .models import Product
 
 # Register your models here.
 admin.site.register(Product)
-
+```
 
 
 
