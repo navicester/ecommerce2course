@@ -48,6 +48,9 @@ class Product(models.Model):
 			return img.image.url
 		return img #None
 
+	def get_inventory_url(self):
+		return reverse("product_detail", kwargs={"pk": self.pk})
+
 class Variation(models.Model):
 	product = models.ForeignKey(Product)
 	title = models.CharField(max_length=120)
