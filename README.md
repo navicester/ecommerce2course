@@ -591,7 +591,7 @@ pillow是python image库
 
 创建ProductImage类 (product.models)
 
-其中，存放路径在MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_in_env", "media_root")
+其中，存放路径在`MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_in_env", "media_root")`
 
 子目录可以自定义
 
@@ -612,15 +612,20 @@ def image_upload_to(instance, filename):
 则title, slug, basename, file_extension, new_filename的值分别如下：
 
 [iPhone Cover] [iphone-cover] [iphone_cover] [jpg] [iphone-cover-2.jpg]
-<pre>
+
 如果是第一次创建ProductImage，instance.id为None
+<pre>
 MP3 Player mp3-player mp3_player jpg mp3-player-None.jpg
 MP3 Player mp3_player.jpg
+</pre>
 同样的名字，如果做第二次修改
+<pre>
 MP3 Player mp3-player mp3_player jpg mp3-player-3.jpg
 MP3 Player mp3_player.jpg
 Currently: products/mp3-player/mp3-player-3.jpg 
+</pre>
 同样的名字，如果继续覆盖，文件不会被覆盖，而是增加随机数重新拷贝一个
+<pre>
 MP3 Player mp3-player mp3_player jpg mp3-player-3.jpg
 MP3 Player mp3_player.jpg
 Currently: products/mp3-player/mp3-player-3_7KveE47.jpg 
@@ -658,6 +663,7 @@ admin.site.register(ProductImage)
 			{{ img.image.file }}
 			{{ img.image.url }}
 </pre>
+
 结果为:
 > 
 <pre>
