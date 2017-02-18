@@ -510,6 +510,171 @@ admin.site.register(Variation)
 
 更新一些css符合commerce的风格
 
+# 015 Post Save Signal for Variation
+https://docs.djangoproject.com/en/1.8/ref/signals/#post-save
+
+实现：Post Save，新建一个product时，如果没有variation，那么创建一个default的variation
+
+如果产品保存是没有型号variation，则自动创建一个
+
+在model添加post save处理
+新建一个product时，如果没有variation，那么创建一个default的variation
+``` python
+def product_post_saved_receiver(sender, instance, created, *args, **kwargs):
+	product = instance
+	variations = product.variation_set.all()
+	if variations.count() == 0:
+		new_var = Variation()
+		new_var.product = product
+		new_var.title = "Default"
+		new_var.price = product.price
+		new_var.save()
+
+post_save.connect(product_post_saved_receiver, sender=Product)
+```
+
+在*template product_detail.html*过滤掉默认创建的variation
+``` html
++{% if object.variation_set.count > 0 %}
+	<select class='form-control'>    
+		{% for vari_obj in object.variation_set.all %}
+		<option value = "{{vari_obj.id}}">
+			{{vari_obj}}
+		</option>
+		{% endfor %}
+	</select>
++{% endif %}
+<br/>
++<a href="#">Add to Cart</a>
+```
+
+# 016 Project Detail Layout
+实现：分为两栏，左边是描述，右边是Variation
+``` html
++<div class="row">
++	<div class="col-sm-8"> 
+		<h2>{{object.title}}</h2>
++		<p class="lead">
++			{{object.description}}
++		</p>
++	</div>
+
++<div class="col-sm-4">
++	<h3>{{object.price}}</h3>
+	{% if object.variation_set.count > 1 %}
+		<select class='form-control'>    
+			{% for vari_obj in object.variation_set.all %}
+			<option value = "{{vari_obj.id}}">
+				{{vari_obj}}
+			</option>
+			{% endfor %}
+		</select>
+	{% endif %}
+	<br/>
+	<hr/>
++	<h4>Related Products</h4>
+	<a href="#">Add to Cart</a>
++</div>
+{% endblock %}
+```
+
+# 017 Image Uploads
+
+https://github.com/codingforentrepreneurs/Guides/blob/master/all/imagefield_and_pillow.md
+
+实现：图片上传功能
+
+pillow是python image库
+``` dos
+>pip install pillow
+```
+
+创建ProductImage类 (product.models)
+
+其中，存放路径在MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_in_env", "media_root")
+
+子目录可以自定义
+
+这儿有2个文件iphone_cover.jpg，mp3_player.jpg分别传给Product里面的iPhone Cover和MP3 Player
+``` python
+from django.utils.text import slugify
+
+def image_upload_to(instance, filename):
+	title = instance.product.title
+	slug = slugify(title)
+	basename, file_extension = filename.split(".")
+	new_filename = "%s-%s.%s" %(slug, instance.id, file_extension)
+	return "products/%s/%s" %(slug, new_filename)
+```
+
+比如上传的文件名名为iphone_cover.jpg，为iPhone Cover model添加ProductImage
+
+则title, slug, basename, file_extension, new_filename的值分别如下：
+
+[iPhone Cover] [iphone-cover] [iphone_cover] [jpg] [iphone-cover-2.jpg]
+<pre>
+如果是第一次创建ProductImage，instance.id为None
+MP3 Player mp3-player mp3_player jpg mp3-player-None.jpg
+MP3 Player mp3_player.jpg
+同样的名字，如果做第二次修改
+MP3 Player mp3-player mp3_player jpg mp3-player-3.jpg
+MP3 Player mp3_player.jpg
+Currently: products/mp3-player/mp3-player-3.jpg 
+同样的名字，如果继续覆盖，文件不会被覆盖，而是增加随机数重新拷贝一个
+MP3 Player mp3-player mp3_player jpg mp3-player-3.jpg
+MP3 Player mp3_player.jpg
+Currently: products/mp3-player/mp3-player-3_7KveE47.jpg 
+</pre>
+
+入参instance和filename分别为
+iPhone Cover iphone_cover.jpg
+filename为上传文件的文件名
+``` python
+class ProductImage(models.Model):
+	product = models.ForeignKey(Product)
+	image = models.ImageField(upload_to=image_upload_to)
+
+	def __unicode__(self):
+		return self.product.title
+```
+
+``` dos
+>python manage.py makemigrations
+>python manage.py migrate
+```
+
+创建admin接口
+``` python
+from .models import Product,Variation,ProductImage
+
+admin.site.register(ProductImage)
+```
+
+在product_detail_view添加图片显示
+
+下面这两个的显示分别如下
+> 
+<pre>
+			{{ img.image.file }}
+			{{ img.image.url }}
+</pre>
+结果为:
+> 
+<pre>
+D:\virtualenv\ecommerce-ws\src\static_in_env\media_root\products\mp3-player\mp3-player-None.jpg 
+/media/products/mp3-player/mp3-player-None.jpg
+</pre>
+
+``` python
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_in_env", "media_root")
+```
+
+
+
+
+
+
 
 
 
