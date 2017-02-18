@@ -248,15 +248,15 @@ render_to_response(context, **response_kwargs)¶
 
 class django.views.generic.detail.SingleObjectMixin
 <pre>
-get_slug_field()¶
+get_slug_field()
 	Returns the name of a slug field to be used to look up by slug. By default this simply returns the value of slug_field.
-get_queryset()¶
+get_queryset()
 	Returns the queryset that will be used to retrieve the object that this view will display. By default, get_queryset()returns the value of the queryset attribute if it is set, otherwise it constructs a QuerySet by calling the all()method on the model attribute’s default manager.
-get_object(queryset=None)¶
+get_object(queryset=None)
 	Returns the single object that this view will display. If queryset is provided, that queryset will be used as the source of objects; otherwise, get_queryset() will be used. get_object() looks for a pk_url_kwarg argument in the arguments to the view; if this argument is found, this method performs a primary-key based lookup using that value. If this argument is not found, it looks for a slug_url_kwarg argument, and performs a slug lookup using the slug_field.
-get_context_object_name(obj)¶
+get_context_object_name(obj)
 	Return the context variable name that will be used to contain the data that this view is manipulating. Ifcontext_object_name is not set, the context name will be constructed from the model_name of the model that the queryset is composed from. For example, the model Article would have context object named 'article'.
-get_context_data(**kwargs)¶
+get_context_data(**kwargs)
 	Returns context data for displaying the list of objects.
 	The base implementation of this method requires that the self.object attribute be set by the view (even if None). Be sure to do this if you are using this mixin without one of the built-in views that does so.
 	It returns a dictionary with these contents:
