@@ -201,7 +201,7 @@ Generic display views
 
 **class django.views.generic.detail.DetailView**
 <pre>
-While this view is executing, `self.object` will contain the object that the view is operating upon.
+While this view is executing, self.object will contain the object that the view is operating upon.
 This view inherits methods and attributes from the following views:
 
 •	django.views.generic.detail.SingleObjectTemplateResponseMixin
@@ -226,41 +226,42 @@ Method Flowchart
 **class django.views.generic.base.View**
 <pre>
 dispatch(request, *args, **kwargs)
-The view part of the view – the method that accepts a request argument plus arguments, and returns a HTTP response.
-The default implementation will inspect the HTTP method and attempt to delegate to a method that matches the HTTP method; a GET will be delegated to get(), a POST to post(), and so on.
-By default, a HEAD request will be delegated to get(). If you need to handle HEAD requests in a different way thanGET, you can override the head() method. See Supporting other HTTP methods for an example.
+	The view part of the view – the method that accepts a request argument plus arguments, and returns a HTTP response.
+	The default implementation will inspect the HTTP method and attempt to delegate to a method that matches the HTTP method; a GET will be delegated to get(), a POST to post(), and so on.
+	By default, a HEAD request will be delegated to get(). If you need to handle HEAD requests in a different way thanGET, you can override the head() method. See Supporting other HTTP methods for an example.
+
 http_method_not_allowed(request, *args, **kwargs)
-If the view was called with a HTTP method it doesn’t support, this method is called instead.
-The default implementation returns HttpResponseNotAllowed with a list of allowed methods in plain text.
+	If the view was called with a HTTP method it doesn’t support, this method is called instead.
+	The default implementation returns HttpResponseNotAllowed with a list of allowed methods in plain text.
 </pre>
 
 class django.views.generic.base.TemplateResponseMixin
 <pre>
 get_template_names()
-Returns a list of template names to search for when rendering the template.
-If template_name is specified, the default implementation will return a list containing template_name (if it is specified).
+	Returns a list of template names to search for when rendering the template.
+	If template_name is specified, the default implementation will return a list containing template_name (if it is specified).
 render_to_response(context, **response_kwargs)¶
-Returns a self.response_class instance.
-If any keyword arguments are provided, they will be passed to the constructor of the response class.
-Calls get_template_names() to obtain the list of template names that will be searched looking for an existent template.
+	Returns a self.response_class instance.
+	If any keyword arguments are provided, they will be passed to the constructor of the response class.
+	Calls get_template_names() to obtain the list of template names that will be searched looking for an existent template.
 </pre>
 
 class django.views.generic.detail.SingleObjectMixin
 <pre>
 get_slug_field()¶
-Returns the name of a slug field to be used to look up by slug. By default this simply returns the value of slug_field.
+	Returns the name of a slug field to be used to look up by slug. By default this simply returns the value of slug_field.
 get_queryset()¶
-Returns the queryset that will be used to retrieve the object that this view will display. By default, get_queryset()returns the value of the queryset attribute if it is set, otherwise it constructs a QuerySet by calling the all()method on the model attribute’s default manager.
+	Returns the queryset that will be used to retrieve the object that this view will display. By default, get_queryset()returns the value of the queryset attribute if it is set, otherwise it constructs a QuerySet by calling the all()method on the model attribute’s default manager.
 get_object(queryset=None)¶
-Returns the single object that this view will display. If queryset is provided, that queryset will be used as the source of objects; otherwise, get_queryset() will be used. get_object() looks for a pk_url_kwarg argument in the arguments to the view; if this argument is found, this method performs a primary-key based lookup using that value. If this argument is not found, it looks for a slug_url_kwarg argument, and performs a slug lookup using the slug_field.
+	Returns the single object that this view will display. If queryset is provided, that queryset will be used as the source of objects; otherwise, get_queryset() will be used. get_object() looks for a pk_url_kwarg argument in the arguments to the view; if this argument is found, this method performs a primary-key based lookup using that value. If this argument is not found, it looks for a slug_url_kwarg argument, and performs a slug lookup using the slug_field.
 get_context_object_name(obj)¶
-Return the context variable name that will be used to contain the data that this view is manipulating. Ifcontext_object_name is not set, the context name will be constructed from the model_name of the model that the queryset is composed from. For example, the model Article would have context object named 'article'.
+	Return the context variable name that will be used to contain the data that this view is manipulating. Ifcontext_object_name is not set, the context name will be constructed from the model_name of the model that the queryset is composed from. For example, the model Article would have context object named 'article'.
 get_context_data(**kwargs)¶
-Returns context data for displaying the list of objects.
-The base implementation of this method requires that the self.object attribute be set by the view (even if None). Be sure to do this if you are using this mixin without one of the built-in views that does so.
-It returns a dictionary with these contents:
-•	object: The object that this view is displaying (self.object).
-•	context_object_name: self.object will also be stored under the name returned byget_context_object_name(), which defaults to the lowercased version of the model name.
+	Returns context data for displaying the list of objects.
+	The base implementation of this method requires that the self.object attribute be set by the view (even if None). Be sure to do this if you are using this mixin without one of the built-in views that does so.
+	It returns a dictionary with these contents:
+	•	object: The object that this view is displaying (self.object).
+	•	context_object_name: self.object will also be stored under the name returned byget_context_object_name(), which defaults to the lowercased version of the model name.
 </pre>
 
 class django.views.generic.list.ListView¶
@@ -274,6 +275,7 @@ This view inherits methods and attributes from the following views:
 •	django.views.generic.list.BaseListView
 •	django.views.generic.list.MultipleObjectMixin
 •	django.views.generic.base.View
+
 Method Flowchart
 1.	dispatch()
 2.	http_method_not_allowed()
