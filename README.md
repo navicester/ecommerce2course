@@ -82,7 +82,7 @@ git init
 git remote add origin git@github.com:navicester/ecommerce2course.git
 git add .
 git push -u origin master
-``
+```
 
 # 006 Project Roadmap
 
@@ -106,7 +106,7 @@ git push -u origin master
 	- 014 定义Variation (model)，添加admin，更新Product模板添加Variation选项(template)
 	- 015 Product保存时，如果没有型号，则添加一个默认型号 (Post Save)
 -	Product Vew Layout
-	- 016 分为两列，左边(col-sm-8)显示title，description，右边显示Variation
+	- 016 分为两列，左边(`col-sm-8`)显示title，description，右边显示Variation
 	- 017 图片上传功能 (image)
 	- 018 搜索功能 (search)
 	- 019 库存显示功能，应用(ModelFormset)功能
