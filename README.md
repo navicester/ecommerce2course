@@ -99,21 +99,21 @@ git push -u origin master
  - 009 添加ProductDetailView入口 (url)
  - 010 实现模板 (template)
 -	ListView
-	- 011 添加ProductListView (View), 模板(template), 入口 (url)
-	- 012 模板里添加直接访问Model实例的链接 (get_absolute_url)
-	- 013 定制Model queryset (Model Manager)
+ - 011 添加ProductListView (View), 模板(template), 入口 (url)
+ - 012 模板里添加直接访问Model实例的链接 (get_absolute_url)
+ - 013 定制Model queryset (Model Manager)
 -	Variation
-	- 014 定义Variation (model)，添加admin，更新Product模板添加Variation选项(template)
-	- 015 Product保存时，如果没有型号，则添加一个默认型号 (Post Save)
+ - 014 定义Variation (model)，添加admin，更新Product模板添加Variation选项(template)
+ - 015 Product保存时，如果没有型号，则添加一个默认型号 (Post Save)
 -	Product Vew Layout
-	- 016 分为两列，左边(`col-sm-8`)显示title，description，右边显示Variation
-	- 017 图片上传功能 (image)
-	- 018 搜索功能 (search)
-	- 019 库存显示功能，应用(ModelFormset)功能
-	- 020 库存登录才能访问，(LoginRequiredMixin)
-	- 021 消息 (Message)
-	- 022 分享
-	- 023 动态更新价格 (Jquery)
+ - 016 分为两列，左边(`col-sm-8`)显示title，description，右边显示Variation
+ - 017 图片上传功能 (image)
+ - 018 搜索功能 (search)
+ - 019 库存显示功能，应用(ModelFormset)功能
+ - 020 库存登录才能访问，(LoginRequiredMixin)
+ - 021 消息 (Message)
+ - 022 分享
+ - 023 动态更新价格 (Jquery)
 
 
 
