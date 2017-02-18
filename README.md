@@ -13,16 +13,17 @@ Sublime
 # 004 Setup a previous project
 
 从github repository拿到trydjango的git地址git@github.com:navicester/trydjango18course.git
+
 或者https://github.com/codingforentrepreneurs/ecommerce-2
 
 ## 克隆基础项目
-``` python
+``` dos
 >git clone git@github.com:navicester/trydjango18course.git
 ```
 `virtualenv .` 试了一下不工作，还是回到父目录执行
 
 ## 安装request组件
-``` python
+``` dos
 >pip install requests[security] 有时安装不成功
 >pip freeze
 ```
@@ -40,22 +41,44 @@ pyOpenSSL==16.1.0
 requests==2.11.1
 six==1.10.0
 </pre>
+
 ``` python
 >pip install -r requirements.txt
 ```
 
-更新django到1.8版本
+## 更新django到1.8版本
+``` python
 >pip install django==1.8.4
 >pip install django-registration-redux  --upgrade
+```
 
-更新安装组件
+## 更新安装组件
+``` python
 >pip freeze > requirements.txt
+```
 
-删除老的数据库
+## 删除老的数据库
+``` dos
 >rm db.sqlite3
+```
 
-数据库迁移
+## 数据库迁移
+``` dos
 >python manage.py migrate
+```
 
-创建超级用户
+## 创建超级用户
+``` python
 >python manage.py createsuperuser
+```
+
+
+
+
+
+
+
+
+
+
+
