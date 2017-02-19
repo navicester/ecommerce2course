@@ -742,11 +742,221 @@ class ProductListView(FilterMixin, ListView):
 
 ```
 
+# 019 Formset for Inventory
+实现：库存视图
+- 定义Variation库存ModelForm
+- 定义Variation Model
+- 定义VariationListView视图（从ListView继承），使用到Formset
+- 添加variation入口
+
+https://docs.djangoproject.com/en/1.8/topics/forms/modelforms/#modelform-factory-function
+
+127.0.0.1:8000/products/1/inventory/
+
+添加*forms.py* 
+
+ViarationInventoryForm
+``` python
+from django import forms
+from django.forms.models import modelformset_factory
+from .models import Variation
+
+class VariationInventoryForm(forms.ModelForm):
+	class Meta:
+		model = Variation
+		fields = [
+			"price",
+			"sale_price",
+			"inventory",
+			"active",
+		]
+
+VariationInventoryFormSet = modelformset_factory(Variation, form=VariationInventoryForm, extra=0)
+```
+
+form.instance是自带的参数
+``` python
+class BaseModelForm(BaseForm):
+    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None,
+                 initial=None, error_class=ErrorList, label_suffix=None,
+                 empty_permitted=False, instance=None):
+```
+
+在model中增加variation定义
+
+在views.py增加VariationList object
+
+``` python
+from django.contrib import messages
+from django.shortcuts import render, get_object_or_404, redirect
+
+class VariationListView(ListView):
+	model = Variation
+	queryset = Variation.objects.all()
+
+	def get_context_data(self, *args, **kwargs):
+		context = super(VariationListView, self).get_context_data(*args, **kwargs)
+		context["formset"] = VariationInventoryFormSet(queryset=self.get_queryset()) 增加formset context
+		return context
+
+	def get_queryset(self, *args, **kwargs):
+		product_pk = self.kwargs.get("pk")
+		if product_pk:
+			product = get_object_or_404(Product, pk=product_pk)
+			queryset = Variation.objects.filter(product=product) 过滤variation为对应与该product的
+		return queryset
+
+	def post(self, request, *args, **kwargs):
+		formset = VariationInventoryFormSet(request.POST, request.FILES)
+		if formset.is_valid():
+			formset.save(commit=False)
+			for form in formset:
+				new_item = form.save(commit=False)
+				#if new_item.title:
+				product_pk = self.kwargs.get("pk")
+				product = get_object_or_404(Product, pk=product_pk)
+				new_item.product = product
+				new_item.save()
+				
+			messages.success(request, "Your inventory and pricing has been updated.") 抛出消息
+			return redirect("products")
+		raise Http404
+```
+
+增加variation url
+``` python
+    url(r'^(?P<pk>\d+)/inventory/$', VariationListView.as_view(), name='product_inventory'),
+```
+
+添加products/templates/products/variation_list.html
+
+#template_name = "<appname>/<modelname>_list.html"
+
+``` python
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<table class='table'>
+{% for object in object_list %}
+
+<tr>
+<td><a href='{{ object.get_absolute_url }}'>{{ object.title }}</a></td><td>{{ object.inventory }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<form method="POST" action=""> {% csrf_token %}
+
+{{ formset.management_form }}
+{% for form in formset %}
+{{ form.instance.product.title }} 
+{{ form.instance.title }}
+{{ form.as_p }}
+
+{% endfor %}
+<input type="submit" value='Update' class='btn' />
+</form>
+
+{% endblock %}
+```
+
+另外：可以通过下面方法添加inventory超链接（不在原始文档里）
+``` python
+class Product(models.Model):
+
+	def get_inventory_url(self):
+		return reverse("product_inventory", kwargs={"pk": self.pk})
+```
+
+``` html
+<a href="{{object.get_inventory_url}}">Inventory</a>
+```
+
+# 020 Login Required Mixins
+实现：库存需登录才能访问
+
+创建文件*products/mixins.py*	
+
+``` python
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+
+from django.http import Http404
+
+
+class StaffRequiredMixin(object):
+	@classmethod
+	def as_view(self, *args, **kwargs):
+		view = super(StaffRequiredMixin, self).as_view(*args, **kwargs)
+		return login_required(view)
+
+	@method_decorator(login_required)
+	def dispatch(self, request, *args, **kwargs):
+		if request.user.is_staff:
+			return super(StaffRequiredMixin, self).dispatch(request, *args, **kwargs)
+		else:
+			raise Http404
 
 
 
+class LoginRequiredMixin(object):
+	@classmethod
+	def as_view(self, *args, **kwargs):
+		view = super(LoginRequiredMixin, self).as_view(*args, **kwargs)
+		return login_required(view)
 
+	@method_decorator(login_required)
+	def dispatch(self, request, *args, **kwargs):
+		return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
+```
 
+更新views.py
+
+添加StaffRequiredMixin基类
+``` python
+from .mixins import StaffRequiredMixin
+class VariationListView(StaffRequiredMixin, ListView):
+```
+
+# 021 Django Message
+https://docs.djangoproject.com/en/1.8/ref/contrib/messages/#using-messages-in-views-and-templates
+
+[Displaying messages](https://docs.djangoproject.com/en/1.8/ref/contrib/messages/#displaying-messages)
+
+[get_messages(request)](https://docs.djangoproject.com/en/1.8/ref/contrib/messages/#django.contrib.messages.get_messages)
+
+In your template, use something like:
+``` html
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+```
+将这一段拷贝到 base.html
+
+通过http://getbootstrap.com/components/#alerts
+修饰
+``` html
+  {% if messages %}
+
+  <div class='container'>
+    <div class='alert alert-success text-center alert-dismissible'>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      {% for message in messages %}
+        <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p><br/>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+```
+
+[F021_message](static_in_pro/media/F021_message.png)
 
 
 
