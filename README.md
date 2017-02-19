@@ -675,8 +675,72 @@ D:\virtualenv\ecommerce-ws\src\static_in_env\media_root\products\mp3-player\mp3-
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_in_env", "media_root")
 ```
+# 018 Search Query
+实现：这一节实现搜索功能
 
+如果想要搜索的话，一般我们会用
 
+127.0.0.1:8000/products/?q=
+
+## 后台处理
+distinct符合两个q的object不会重复显示
+
+*products/views.py*
+``` python
++from django.db.models import Q
+
+class ProductListView(FilterMixin, ListView):
+	model = Product
+	queryset = Product.objects.all()
+
+	def get_context_data(self, *args, **kwargs):
+		context = super(ProductListView, self).get_context_data(*args, **kwargs)
+		context["now"] = timezone.now()
++		context["query"] = self.request.GET.get("q") #None
+		return context
+
++	def get_queryset(self, *args, **kwargs):
++		qs = super(ProductListView, self).get_queryset(*args, **kwargs)
++		query = self.request.GET.get("q")
++		if query:
++			qs = self.model.objects.filter(
++				Q(title__icontains=query) |
++				Q(description__icontains=query)
++				)
++			try:
++				qs2 = self.model.objects.filter(
++					Q(price=query)
++				)
++				qs = (qs | qs2).distinct()
++			except:
++				pass
++		return qs
+```
+
+## 添加navbar
+修改navbar.html来增加搜索
+
+注释掉about和contact不再使用
+
+去掉默认的submit按钮，功能跟回车一样
+添加method为get，action指向product url
+
+``` python
+-            <li><a href="{% url 'about' %}">About</a></li>
+-            <li><a href="{% url 'contact' %}">Contact</a></li>
++            <!-- <li><a href="{% url 'about' %}">About</a></li>
++            <li><a href="{% url 'contact' %}">Contact</a></li> -->
+
+-            <form class="navbar-form navbar-left" role="search">
++			<form class="navbar-form navbar-left" method="GET" role="search" action='{% url "products" %}'>
+            <div class="form-group">
+-              <input type="text" class="form-control" placeholder="Search"'>
++			  <input type="text" class="form-control" placeholder="Search" name="q"'>
+            </div>
+           <!--  <button type="submit" class="btn btn-default">Submit</button> -->
+          </form>
+
+```
 
 
 
