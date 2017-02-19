@@ -1465,113 +1465,51 @@ category_detail.html
 - jumbotron改为产品展示
 - 增加FeatureProduct类
 
-> 
+<pre>
 #       modified:   newsletter/views.py
 #       modified:   products/admin.py
 #       modified:   products/models.py
 #       modified:   templates/home.html
+</pre>
 
 ----------------------------- newsletter/views.py -----------------------------
 ``` python
- from django.conf import settings
- from django.core.mail import send_mail
  
 +from products.models import ProductFeatured
- from .forms import SignUpForm,ContactForm
- from .models import SignUp
  
- def home(request):    
+def home(request):    
  
-     title = 'Sign Up now'
-+    featured_image = ProductFeatured.objects.filter(active=True).order_by("?").first()
-+
-     form = SignUpForm(request.POST or None)
-     context = {
-         "title": title,
--        "form": form        
-+        "form": form,
-+        "featured_image":featured_image,
-     }
--    print request
--    print request.POST
-+    #print request
-+    #print request.POST
-     
-     if form.is_valid():
-         #form.save()
+    title = 'Sign Up now'
++   featured_image = ProductFeatured.objects.filter(active=True).order_by("?").first()
+
+    form = SignUpForm(request.POST or None)
+    context = {
+        "title": title,   
+        "form": form,
++       "featured_image":featured_image,
+    }
+-   print request
+-   print request.POST
++   #print request
++   #print request.POST
 ```
 ------------------------------ products/admin.py ------------------------------
-index d2ab3a8..7c658b2 100644
-@@ -1,10 +1,11 @@
- from django.contrib import admin
- 
+``` python
 -from .models import Product,Variation,ProductImage,Category
 +from .models import Product,Variation,ProductImage,Category,ProductFeatured
  
- 
- # Register your models here.
- admin.site.register(Product)
- admin.site.register(Variation)
- admin.site.register(ProductImage)
--admin.site.register(Category)
-\ No newline at end of file
-+admin.site.register(Category)
 +admin.site.register(ProductFeatured)
-\ No newline at end of file
-
------------------ products/migrations/0006_productfeatured.py -----------------
-new file mode 100644
-index 0000000..ceb735b
-@@ -0,0 +1,30 @@
-+# -*- coding: utf-8 -*-
-+from __future__ import unicode_literals
-+
-+from django.db import models, migrations
-+import products.models
-+
-+
-+class Migration(migrations.Migration):
-+
-+    dependencies = [
-+        ('products', '0005_auto_20161002_1626'),
-+    ]
-+
-+    operations = [
-+        migrations.CreateModel(
-+            name='ProductFeatured',
-+            fields=[
-+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-+                ('image', models.ImageField(upload_to=products.models.image_upload_to_featured)),
-+                ('title', models.CharField(max_length=120, null=True, blank=True)),
-+                ('text', models.CharField(max_length=220, null=True, blank=True)),
-+                ('text_right', models.BooleanField(default=False)),
-+                ('text_css_color', models.CharField(max_length=6, null=True, blank=True)),
-+                ('show_price', models.BooleanField(default=False)),
-+                ('make_image_background', models.BooleanField(default=False)),
-+                ('active', models.BooleanField(default=True)),
-+                ('product', models.ForeignKey(to='products.Product')),
-+            ],
-+        ),
-+    ]
+```
 
 ------------------------------ products/models.py ------------------------------
-index 722c025..e4c8d8d 100644
-@@ -117,4 +117,26 @@ class Category(models.Model):
- 		return self.title
- 		
- 	def get_absolute_url(self):
--		return reverse("category_detail", kwargs={"slug": self.slug })		
-\ No newline at end of file
-+		return reverse("category_detail", kwargs={"slug": self.slug })
-+
-+
+``` python
 +def image_upload_to_featured(instance, filename):
 +	title = instance.product.title
 +	slug = slugify(title)
 +	basename, file_extension = filename.split(".")
 +	new_filename = "%s-%s.%s" %(slug, instance.id, file_extension)
 +	return "products/%s/featured/%s" %(slug, new_filename)
-+
+
 +class ProductFeatured(models.Model):
 +	product = models.ForeignKey(Product)
 +	image = models.ImageField(upload_to=image_upload_to_featured)
@@ -1585,51 +1523,27 @@ index 722c025..e4c8d8d 100644
 +
 +	def __unicode__(self):
 +		return self.product.title
-\ No newline at end of file
+```
 
 ----------------------------- templates/home.html -----------------------------
-index 39b5354..46a46f5 100644
-@@ -12,38 +12,59 @@
+``` html
+.jumbotron {
+    background-color: #5ACDFF !important;
+-   color : #F5F5F5;
++   /*color : #F5F5F5;*/
++   color : #000;
++   {% if featured_image.make_image_background %} 
++   background-image: url("{{ featured_image.image.url }}");
++   background-repeat: no-repeat;
++   background-color: #000;
++   background-size: cover; /*stretch to adapt screen*/
++   background-position-y: -272px;
++   {% endif %}    
+}
+
  
- .jumbotron {
-     background-color: #5ACDFF !important;
--    color : #F5F5F5;
-+    /*color : #F5F5F5;*/
-+    color : #000;
-+    {% if featured_image.make_image_background %} 
-+    background-image: url("{{ featured_image.image.url }}");
-+    background-repeat: no-repeat;
-+    background-color: #000;
-+    background-size: cover; /*stretch to adapt screen*/
-+    background-position-y: -272px;
-+    {% endif %}    
- }
- {% endblock %}
- </style>
- 
- {% block jumbotron %}
- {% if not request.user.is_authenticated%}
--<!-- Main component for a primary marketing message or call to action -->
--<div class="jumbotron">
--<div class="container">
--  <div class="row">
--    <div class="col-sm-6">
--        <h1>Try Django1.8</h1>
--        <p>The MVP Landing project is designed to get your project started. The goal is to help you launch as soon as possible with the least amount of investment using time or money. Join Us today.</p>
--        <p>To see the difference between static and fixed top navbars, just scroll.</p>
--        <p>
--          <a class="btn btn-lg btn-primary" href="" role="button">Join us &raquo;</a>
--        </p>
--    </div>
--<!--     <div class="col-sm-6" style="background-color:black;min-height:300px;"> -->
--          <!--
--          <div class='col-sm-6' >
--                <iframe width="560" height="315" src="http://v.youku.com/v_show/id_XMTQyMjMzNjQ2OA==.html" frameborder="0" allowfullscreen></iframe>
--          </div>
--          -->
--          <div class='col-sm-6 video'>
--              <embed width="560" height="315"  src="http://player.youku.com/player.php/Type/Folder/Fid/26679028/Ob/1/sid/XMTQ2Nzg5NjM4NA==/v.swf" quality="high" width="480" height="400" align="middle" allowScriptAccess="always" allowFullScreen="true" mode="transparent" type="application/x-shockwave-flash"></embed>
--          </div>
+{% block jumbotron %}
+{% if not request.user.is_authenticated%}
 +    {% if featured_image %} 
 +    <div class="jumbotron">
 +        <div class="container">
@@ -1650,28 +1564,26 @@ index 39b5354..46a46f5 100644
 +        </div>
 +    </div>    
 +    {% else %}
-+    <div class="jumbotron">
-+        <div class="container">
-+            <div class="row">
-+                <div class="col-sm-6">
-+                    <h1>Try Django1.8</h1>
-+                    <p>The MVP Landing project is designed to get your project started. The goal is to help you launch as soon as possible with the least amount of investment using time or money. Join Us today.</p>
-+                    <p>To see the difference between static and fixed top navbars, just scroll.</p>
-+                    <p>
-+                        <a class="btn btn-lg btn-primary" href="" role="button">Join us &raquo;</a>
-+                    </p>
-+                </div>
-+                <div class='col-sm-6 video'>
-+                    <embed width="560" height="315"  src="http://player.youku.com/player.php/Type/Folder/Fid/26679028/Ob/1/sid/XMTQ2Nzg5NjM4NA==/v.swf" quality="high" width="480" height="400" align="middle" allowScriptAccess="always" allowFullScreen="true" mode="transparent" type="application/x-shockwave-flash"></embed>
-+                </div>
-+            </div>
-+        </div>
-     </div>
--  </div>
--</div>
--</div>
-+    {% endif %}
- {% endif %}
- {% endblock %}
+    <div class="jumbotron">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h1>Try Django1.8</h1>
+                    <p>The MVP Landing project is designed to get your project started. The goal is to help you launch as soon as possible with the least amount of investment using time or money. Join Us today.</p>
+                    <p>To see the difference between static and fixed top navbars, just scroll.</p>
+                    <p>
+                        <a class="btn btn-lg btn-primary" href="" role="button">Join us &raquo;</a>
+                    </p>
+                </div>
+                <div class='col-sm-6 video'>
+                    <embed width="560" height="315"  src="http://player.youku.com/player.php/Type/Folder/Fid/26679028/Ob/1/sid/XMTQ2Nzg5NjM4NA==/v.swf" quality="high" width="480" height="400" align="middle" allowScriptAccess="always" allowFullScreen="true" mode="transparent" type="application/x-shockwave-flash"></embed>
+                </div>
+            </div>
+        </div>
+    </div>
++	{% endif %}
+{% endif %}
+{% endblock %}
+```
 
 
