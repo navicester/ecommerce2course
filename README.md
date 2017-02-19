@@ -1586,4 +1586,167 @@ def home(request):
 {% endblock %}
 ```
 
+# 032 Login as Dropdown Menu
+
+修改*navbar.html*
+``` html
+          <ul class="nav navbar-nav navbar-right">
+            {% if request.user.is_authenticated %}
+            <li><a href="{% url 'auth_logout' %}">Logout</a></li>
+            {% else %}
+            <li><a href="{% url 'registration_register' %}">Register</a></li>
+              {% if not request.user.is_authenticated and not "/accounts/login" in request.get_full_path %}
++              <li class="dropdown">
++                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Accounts <span class="caret"></span></a>
++                <ul class="dropdown-menu">
+                  <form class='navbar-form' method='POST' action='{% url "auth_login" %}'>{% csrf_token %}
+                    <div class='form-group'>
+                        <input type='text' class='form-control' name='username' placeholder='Username' /> 
+                    </div>
+                    <div class='form-group'>
+                        <input type='password' class='form-control' name='password' placeholder='Password' />
+                    </div>
+                    <button type='submit' class='btn btn-default'>Login</button>
+                  </form>
+                  <p class="text-center"><a href="{% url 'auth_login' %}">Forget Password</a></p>
+                </ul>
+              </li>
+              {% endif %}            
+              <li><a href="{% url 'auth_login' %}">Login</a></li>
+            {% endif %}
+          </ul>
+```
+
+# 033 Shopping cart icon
+
+登录界面移到下拉菜单后为cart腾出了位置
+
+从下面网页获取icon  
+http://fontawesome.io/icon/shopping-cart/
+
+<pre>
+#       modified:   static_in_pro/our_static/css/custom.css
+#       modified:   templates/navbar.html
+</pre>
+
+*static_in_pro/our_static/css/custom.css*
+``` css
+.fa-navbar-cart{
+	font-size: 18px;
+    vertical-align: middle;
+```
+
+*templates/navbar.html*
+``` html
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#"><i class="fa fa-shopping-cart fa-navbar-cart"></i> <span class='badge'>0</span></a></li>
+            {% if request.user.is_authenticated %}
+            <li><a href="{% url 'auth_logout' %}">Logout</a></li>
+```
+![F033_cart](static_in_pro/media/F033_cart.png)
+
+# 034 Product Lists on Homepage
+
+css中的class名字注意：  
+col_class_set OK  
+col-class-set KO  
+
+<pre>
+#       modified:   newsletter/views.py
+#       modified:   products/templates/products/product_list.html
+#       modified:   templates/home.html
+#
+#       new : products/templates/products/products.html
+</pre>
+
+*newsletter/views.py*
+``` python
+def home(request):    
+
+    title = 'Sign Up now'
+    featured_image = ProductFeatured.objects.filter(active=True).order_by("?").first()
++    products = Product.objects.all().order_by('?')[:6]
++    products2 = Product.objects.all().order_by('?')[:6]
+
+    form = SignUpForm(request.POST or None)
+    context = {
+        "title": title,
+        "form": form,
+        "featured_image":featured_image,
++        "products":products,
++        "products2":products2,
+    }
+```
+
+*products/templates/products/product_list.html*
+``` html
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>All Products <small><a href="{% url 'categories' %}">Categories</a></small></h1>
+<div class='row'>
++	{% include 'products/products.html' with object_list=object_list %}
+</div>
+
+{% endblock %}
+
+在templates/home.html添加下面内容
+{% block content %}
+<div class="row">
+<h3>Recommended Products</h3>
+{% include 'products/products.html' with object_list=products col_class_set="col-sm-2" %}
+</div>
+
+<div class="row">
+<h3>Featured Products</h3>
+{% include 'products/products.html' with object_list=products2 %}
+</div>
+```
+
+*products/templates/products/products.html*
+``` html
+	{% for product in object_list %}
+		<div class='col-xs-4 {{col_class_set}}'>
+			{% include 'products/product_thumbnail.html' with product=product price='True' %}
+		</div>
+		{% if not col_class_set %}
+		{% cycle '' '' '</div><div class="row">'%} 
+		{% endif %}
+	
+	{% endfor %}
+```
+
+# 035 Product Editing with django Inline
+
+https://docs.djangoproject.com/en/1.8/ref/contrib/admin/#inlinemodeladmin-objects
+
+<pre>
+#       modified:   products/admin.py
+</pre>
+
+``` python
+class ProductImageInline(admin.TabularInline):
+	model = ProductImage
+	extra = 0
+	max_num = 10
+
+class VariationInline(admin.TabularInline):
+	model = Variation
+	extra = 0
+	max_num = 10
+
+
+class ProductAdmin(admin.ModelAdmin):
+	list_display = ['__unicode__', 'price']
+	inlines = [
+		ProductImageInline,
+		VariationInline,
+	]
+	class Meta:
+		model = Product
+
+admin.site.register(Product, ProductAdmin)
+```
+
 
