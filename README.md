@@ -830,7 +830,7 @@ class VariationListView(ListView):
 
 添加products/templates/products/variation_list.html
 
-#template_name = "<appname>/<modelname>_list.html"
+*#template_name = "<appname>/<modelname>_list.html"*
 
 ``` python
 
@@ -956,7 +956,7 @@ In your template, use something like:
   {% endif %}
 ```
 
-[F021_message](static_in_pro/media/F021_message.png)
+![F021_message](static_in_pro/media/F021_message.png)
 
 
 
