@@ -958,13 +958,720 @@ In your template, use something like:
 
 ![F021_message](static_in_pro/media/F021_message.png)
 
+# 022 Social Share
+https://github.com/codingforentrepreneurs/Guides/blob/master/all/social_share_links.md
+``` python
+	<p>
+	Share<br/>
+	<a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}">
+	<i class="fa fa-facebook-square fa-3x"></i></a>
+
+	<a href="#">
+	<i class="fa fa-twitter-square fa-3x"></i></a>
+	</p>
+```
+
+用法参考lwc
+
+# 023 Dynamic Update Price with jQuery
+包含图片和文字的两种更新方式
+
+文字: text或者html
+
+图片:
+
+在base.html
+``` javascript
+    <script>
+    $(document).ready(function(){
+        {% block jquery %}
+        {% endblock %}
+    });
+    </script>
+```
+
+*Product_detail.html*
+``` javascript
+<script>
+{% block jquery %}
+
+function setPrice(){
+	var price = $(".variation_select option:selected").attr("data-price")
+
+	var sale_price = $(".variation_select option:selected").attr("data-sale-price")
+	if (sale_price != "" && sale_price != "None" && sale_price != null ) {
+	$("#price").html("<h3>" + sale_price + " <small style='color:red;text-decoration:line-through;'>Original Price:" + price  + "</small></h3>");
+	} else {
+	$("#price").html(price);
+	}
+}
+setPrice()
+
+$(".variation_select").change(function(){
+	setPrice();
+	// var img = $(".variation_select option:selected").attr("data-img")
+	// $("img").attr("src", img);
+
+})
+{% endblock %}
+</script>
+```
+
+下面这些会在setPrice会被调用
+``` html
+<img  id='img' class= 'img-responsive' src="{{img.image.url}}"/>
+<h3 id='price'>{{object.price}}</h3>
+<select class='form-control variation_select'>
+<option  data-sale-price="{{ vari_obj.sale_price }}" data-price="{{ vari_obj.price }}"
+```
+
+``` html
+	<div class="col-sm-8"> 
+		<h2>{{object.title}}</h2>
+		{% if object.productimage_set.count > 0 %}
+		<div>
+			{% for img in object.productimage_set.all %}
+			<!-- {{ img.image.file }}
+			{{ img.image.url }} -->
+			<img  id='img' class= 'img-responsive' src="{{img.image.url}}"/>
+			{% endfor %}
+		</div>
+		{% endif %}
+		<p class="lead">
+			{{object.description}}
+		</p>
+	</div>
+	
+	<div class="col-sm-4">
+	<h3 id='price'>{{object.price}}</h3>
+	{% if object.variation_set.count > 1 %}
+		<select class='form-control variation_select'>    
+			{% for vari_obj in object.variation_set.all %}
+		<!-- <option data-img="http://www.spirit1059.com/pics/Feeds/Articles/2015611/118317/Beach.jpg" data-price="{{ vari_obj.price }}" value="{{ vari_obj.id }}">{{ vari_obj }}</option> -->			
+			<option  data-sale-price="{{ vari_obj.sale_price }}" data-price="{{ vari_obj.price }}" value="{{ vari_obj.id }}">{{ vari_obj }}</option>
+			{% endfor %}
+		</select>
+	{% endif %}	
+```
+
+将price的style移到custom.css
+``` css
+style='color:red;text-decoration:line-through;'
+.og-price {
+	color:red;
+	text-decoration:line-through;
+}
+```
+
+# 024 Single Variation Price
+实现：只有一个型号时的价格显示
+``` html
+-	<h3 id='price'>{{object.price}}</h3>
+	{% if object.variation_set.count > 1 %}
++		<h3 id='price'>{{ object.variation_set.first.price }}</h3>		
+		<select class='form-control variation_select'>    
+			{% for vari_obj in object.variation_set.all %}
+		    
+			<option  data-sale-price="{{ vari_obj.sale_price }}" data-price="{{ vari_obj.price }}" value="{{ vari_obj.id }}">{{ vari_obj }}</option>
+			{% endfor %}
+		</select>
+	{% else %}
++		<input type="hidden" name='item' value='{{ object.variation_set.first.id }}' />
++		<h3 id='price'>{% if object.variation_set.first.sale_price %}
++			{{ object.variation_set.first.sale_price  }}
++			<small class='og-price'>{{ object.variation_set.first.price }}</small>
++			{% else %}			
++			{{ object.variation_set.first.price }}
++			{% endif %}
++		</h3>
+	{% endif %}
+```
+
+# 025 Product Categories
+实现： 产品类
+
+``` python
+class Product(models.Model):
+	title = models.CharField(max_length=120)
+	description = models.TextField(blank=True, null=True)
+	price = models.DecimalField(decimal_places=2, max_digits=20)
+	active = models.BooleanField(default=True)
++	categories = models.ManyToManyField('Category', blank=True)
++	default = models.ForeignKey('Category', related_name='default_category', null=True, blank=True)
+
+class Category(models.Model):
+	title = models.CharField(max_length=120, unique=True)
+	slug = models.SlugField(unique=True)
+	description = models.TextField(null=True, blank=True)
+	active = models.BooleanField(default=True)
+	timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+
+	def __unicode__(self):
+		return self.title
 
 
+from .models import Product, Variation, ProductImage, Category
+admin.site.register(Category)
+```
+
+# 026 Category Detail View
+实现：
+- 添加特有的url, url_categories.py，并在url文件里添加该入口
+- 在views添加CategoryListView
+- 添加template （包括定义路径和添加模板文件）ListView的默认名字是template_name = "<appname>/<modelname>_list.html", 这儿修改为”products/product_list.html”
+- 在views添加CategoryDetailView, 同时增加url入口
+- 添加category_detail.html
+
+urls.py
+``` python
+url(r'^categories/', include('products.urls_categories')),
+```
+
+*products/urls_categories.py*
+``` python
+from django.conf import settings
+from django.conf.urls import include, url
+from django.conf.urls.static import static
+from django.contrib import admin
+
+from .views import CategoryListView, CategoryDetailView
+
+urlpatterns = [
+    # Examples:
+    # url(r'^$', 'newsletter.views.home', name='home'),
+    url(r'^$', CategoryListView.as_view(), name='categories'),
+    url(r'^(?P<slug>[\w-]+)/$', CategoryDetailView.as_view(), name='category_detail'),
+    #url(r'^(?P<id>\d+)', 'products.views.product_detail_view_func', name='product_detail_function'),
+```
+slug的设置可参考
+https://github.com/codingforentrepreneurs/Guides/blob/master/all/common_url_regex.md#slugs
+
+*products/views.py*
+``` python
+from .models import Product, Variation, Category
+class CategoryListView(ListView):
+	model = Category
+	queryset = Category.objects.all()
+	template_name = "products/product_list.html"
 
 
+class CategoryDetailView(DetailView):
+	model = Category
+
+	def get_context_data(self, *args, **kwargs):
+		context = super(CategoryDetailView, self).get_context_data(*args, **kwargs)
+		obj = self.get_object()
+		product_set = obj.product_set.all()
+		default_products = obj.default_category.all()
+		products = ( product_set | default_products ).distinct()
+		context["products"] = products
+		return context
+```
+
+*products/models.py*
+``` python
+class Category(models.Model):
+	title = models.CharField(max_length=120, unique=True)
+	slug = models.SlugField(unique=True)
+	description = models.TextField(null=True, blank=True)
+	active = models.BooleanField(default=True)
+	timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+
+	def __unicode__(self):
+		return self.title
+
+	def get_absolute_url(self):
+		return reverse("category_detail", kwargs={"slug": self.slug })
+```
+
+*products/templates/products/category_detail.html*
+```
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>{{ object }}</h3>
+
+<div class = 'table'>
+    {% for product in object.product_set.all %}
+    <tr>
+    	<td>
+    		<a href='{{ product.get_absolute_url }}'>{{product.title}}</a>
+    	</td>
+    </tr>
+    {% endfor %}
+
+</div>
+{% endblock %}
+```
+
+# 027 Related Products
+实现：显示相关产品
+- 修改ProductManager，增加related相关的信息
+- 需改ProductDetailView，覆盖
+
+*models.py*
+``` python
+class Product(models.Model):
+
+	class Meta:
+		ordering = ["-title"]
+
+class ProductManager(models.Manager):
+
+	def get_related(self, instance):
+		products_one = self.get_queryset().filter(categories__in=instance.categories.all())
+		products_two = self.get_queryset().filter(default=instance.default)
+		qs = (products_one | products_two).exclude(id=instance.id).distinct()
+		return qs
+```
+
+*views.py*
+``` python
+class ProductDetailView(DetailView):
+	model = Product
+	#template_name = "product.html"
+	#template_name = "<appname>/<modelname>_detail.html"
+	def get_context_data(self, *args, **kwargs):
+		context = super(ProductDetailView, self).get_context_data(*args, **kwargs)
+		instance = self.get_object()
+		context["related"] = Product.objects.get_related(instance).order_by("?")[:6]
+		return context
+```
+
+*products/template/product_detail.html*
+``` html
+	<h4>Related Products</h4>
+	{% for product in related %}
+		<a href='{{ product.get_absolute_url }}'>{{product.title}}</a>
+	{% endfor %}
+```
+
+# 028 Distinct Radom QuerySets
+本章实现
+- 修改view的context
+- 修改template显示，增加related图形
+
+views.py
+``` python
++import random
+class ProductDetailView(DetailView):
+	model = Product
+	#template_name = "product.html"
+	#template_name = "<appname>/<modelname>_detail.html"
+	def get_context_data(self, *args, **kwargs):
+		context = super(ProductDetailView, self).get_context_data(*args, **kwargs)
+		instance = self.get_object()
+		#order_by("-title")
++		context["related"] = sorted(Product.objects.get_related(instance)[:6], key= lambda x: random.random())
+		return context
+```
+在*models.py*
+``` python
+class Product(models.Model):
+
+	def get_image_url(self):
+		img = self.productimage_set.first() # return obj or None
+		if img:
+			return img.image.url
+		return img #None
+```
+
+*product_detail.html*
+
+修改product image显示方法
+``` html
+		<!-- {% if object.productimage_set.count > 0 %}
+		<div>
+			{% for img in object.productimage_set.all %}
+			<img  id='img' class= 'img-responsive' src="{{img.image.url}}"/>
+			{% endfor %}
+		</div>
+		{% endif %} --> 
++		{% if object.get_image_url %}
++		<div>
++			<img  id='img' class= 'img-responsive' src="{{object.get_image_url}}"/>
++		</div>
++		{% endif %}
 
 
+	<h4>Related Products</h4>
+	{% for product in related %}
+		<!-- <a href='{{ product.get_absolute_url }}'>{{product.title}}</a> -->
++		{% if object.get_image_url %}
++			<img  id='img' class= 'img-responsive' src="{{object.get_image_url}}"/><br>
++		{% else %}
+		    <a href='{{ product.get_absolute_url }}'>{{product.title}}</a>
++		{% endif %}	
+		
+	{% endfor %}
+
+```
+
+# 029 Improve UI
+实现：UI美化
+
+http://getbootstrap.com/components/#thumbnails
+
+用thumbnail美化product_detail.html
+
+cycle用法
+
+``` html
+	<hr/>
+	<h4>Related Products</h4>
++	<div class='row'>
+	{% for product in related %} 
++		<div class='col-xs-6'>
++			<div class='thumbnail text-center'>
++				<h4><a href='{{ product.get_absolute_url }}'>{{product.title}}</a></h4>
+				{% if product.get_image_url %} 
+					<a href='{{ product.get_absolute_url }}'><img  id='img' class= 'img-responsive' src="{{product.get_image_url}}"/></a><br>
+				{% endif %}	
++			</div>
++		</div>
++	{% cycle '' '</div><div class="row">'%}
+	{% endfor %}
++	</div>
+```
+
+美化product_list.html
+``` html
+-<table>
+-	{% for object in object_list %}
+-	<tr>
+-		<!-- <td><a href="/products/{{object.pk}}/">{{object.title}}</a></td>
+-		<td><a href="{% url 'product_detail' pk=object.pk %}">{{object.title}}</a></td> -->
+-		<td><a href="{{ object.get_absolute_url }}">{{object.title}}</a></td>
+-	</tr>
+- 	{% endfor %}
+-</table>
++<h1>All Products <small><a href="{% url 'categories' %}">Categories</a></small></h1>
++<div class='row'>
++	{% for product in object_list %}
++		<div class='col-xs-4'>
++			<div class='thumbnail text-center'>
++				<h4><a href='{{ product.get_absolute_url }}'>{{product.title}}</a></h4>
++				{% if product.get_image_url %} 
++					<a href='{{ product.get_absolute_url }}'><img  id='img' class= 'img-responsive' src="{{product.get_image_url}}"/></a><br>
++				{% endif %}	
++			</div>
++		</div>
++	{% cycle '' '' '</div><div class="row">'%} 
++ 	{% endfor %}
++</div>
+```
+
+美化category_detail.html
+``` html
+<h3>{{ object }}</h3>
+ 
+-<div class = 'table'>
+-    {% for product in object.product_set.all %}
+-    <tr>
+-    	<td>
+-    		<a href='{{ product.get_absolute_url }}'>{{product.title}}</a>
+-    	</td>
+-    </tr>
+-    {% endfor %}
+-</div>
++<div class = 'row'>
++    {% for product in products %}
++		<div class='col-xs-4'>
++			<div class='thumbnail text-center'>
++				<h4><a href='{{ product.get_absolute_url }}'>{{product.title}}</a></h4>
++				{% if product.get_image_url %} 
++					<a href='{{ product.get_absolute_url }}'><img  id='img' class= 'img-responsive' src="{{product.get_image_url}}"/></a><br>
++				{% endif %}	
++			</div>
++		</div>
++	{% cycle '' '' '</div><div class="row">'%} 
++    {% endfor %}
++</div>
+```
+
+# 030 Django Template Include with Variable
+实现：将Thumbnail功能移到专门的问题, include+with
+- 将thumbnail功能移到专门的文件
+- include thumbnail并附带相应的参数
+
+修改models.py
+``` python
+from django.utils.safestring import mark_safe
+
+class Variation(models.Model):
+
+	def get_html_price(self):
+		if self.sale_price is not None:
+			html_text = "<span class='sale-price'>%s</span> <span class='og-price'>%s</span>" %(self.sale_price, self.price)
+		else:
+			html_text = "<span class='price'>%s</span>" %(self.price)
+		return mark_safe(html_text)
+```
 
 
+添加product_thumbnail.html
+``` html
+<div class='thumbnail text-center'>
+	<h4><a href='{{ product.get_absolute_url }}'>{{product.title}}</a></h4>
+	{% if product.get_image_url %} 
+		<a href='{{ product.get_absolute_url }}'><img  id='img' class= 'img-responsive' src="{{product.get_image_url}}"/></a><br>
+	{% endif %}	
+
+	{% if price == "True" %}
+		{{ product.variation_set.first.get_html_price }}
+	{% endif %}	
+</div>
+```
+
+product_list.html
+<div class='row'>
+	{% for product in object_list %}
+		<div class='col-xs-4'>
++			{% include 'products/product_thumbnail.html' with product=product price='True' %}
+		</div>
+	{% cycle '' '' '</div><div class="row">'%} 
+	{% endfor %}
+</div>
+
+product_detail.html
+``` python
+	<h4>Related Products</h4>
+	<div class='row'>
+	{% for product in related %} 
+		<div class='col-xs-6'>
++			{% include "products/product_thumbnail.html" with product=product price="True" %}
+		</div>
+	{% cycle '' '</div><div class="row">'%}
+	{% endfor %}
+	</div>
+```
+
+category_detail.html
+``` python
+<div class = 'row'>
+    {% for product in products %}
+		<div class='col-xs-4'>
++			{% include "products/product_thumbnail.html" with product=product price="True" %}
+		</div>
+	{% cycle '' '' '</div><div class="row">'%} 
+    {% endfor %}
+</div>
+```
+
+# 031 Featured Product on Homepage
+实现功能
+- 在首页增加产品显示
+- jumbotron改为产品展示
+- 增加FeatureProduct类
+
+> 
+#       modified:   newsletter/views.py
+#       modified:   products/admin.py
+#       modified:   products/models.py
+#       modified:   templates/home.html
+
+----------------------------- newsletter/views.py -----------------------------
+``` python
+ from django.conf import settings
+ from django.core.mail import send_mail
+ 
++from products.models import ProductFeatured
+ from .forms import SignUpForm,ContactForm
+ from .models import SignUp
+ 
+ def home(request):    
+ 
+     title = 'Sign Up now'
++    featured_image = ProductFeatured.objects.filter(active=True).order_by("?").first()
++
+     form = SignUpForm(request.POST or None)
+     context = {
+         "title": title,
+-        "form": form        
++        "form": form,
++        "featured_image":featured_image,
+     }
+-    print request
+-    print request.POST
++    #print request
++    #print request.POST
+     
+     if form.is_valid():
+         #form.save()
+```
+------------------------------ products/admin.py ------------------------------
+index d2ab3a8..7c658b2 100644
+@@ -1,10 +1,11 @@
+ from django.contrib import admin
+ 
+-from .models import Product,Variation,ProductImage,Category
++from .models import Product,Variation,ProductImage,Category,ProductFeatured
+ 
+ 
+ # Register your models here.
+ admin.site.register(Product)
+ admin.site.register(Variation)
+ admin.site.register(ProductImage)
+-admin.site.register(Category)
+\ No newline at end of file
++admin.site.register(Category)
++admin.site.register(ProductFeatured)
+\ No newline at end of file
+
+----------------- products/migrations/0006_productfeatured.py -----------------
+new file mode 100644
+index 0000000..ceb735b
+@@ -0,0 +1,30 @@
++# -*- coding: utf-8 -*-
++from __future__ import unicode_literals
++
++from django.db import models, migrations
++import products.models
++
++
++class Migration(migrations.Migration):
++
++    dependencies = [
++        ('products', '0005_auto_20161002_1626'),
++    ]
++
++    operations = [
++        migrations.CreateModel(
++            name='ProductFeatured',
++            fields=[
++                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
++                ('image', models.ImageField(upload_to=products.models.image_upload_to_featured)),
++                ('title', models.CharField(max_length=120, null=True, blank=True)),
++                ('text', models.CharField(max_length=220, null=True, blank=True)),
++                ('text_right', models.BooleanField(default=False)),
++                ('text_css_color', models.CharField(max_length=6, null=True, blank=True)),
++                ('show_price', models.BooleanField(default=False)),
++                ('make_image_background', models.BooleanField(default=False)),
++                ('active', models.BooleanField(default=True)),
++                ('product', models.ForeignKey(to='products.Product')),
++            ],
++        ),
++    ]
+
+------------------------------ products/models.py ------------------------------
+index 722c025..e4c8d8d 100644
+@@ -117,4 +117,26 @@ class Category(models.Model):
+ 		return self.title
+ 		
+ 	def get_absolute_url(self):
+-		return reverse("category_detail", kwargs={"slug": self.slug })		
+\ No newline at end of file
++		return reverse("category_detail", kwargs={"slug": self.slug })
++
++
++def image_upload_to_featured(instance, filename):
++	title = instance.product.title
++	slug = slugify(title)
++	basename, file_extension = filename.split(".")
++	new_filename = "%s-%s.%s" %(slug, instance.id, file_extension)
++	return "products/%s/featured/%s" %(slug, new_filename)
++
++class ProductFeatured(models.Model):
++	product = models.ForeignKey(Product)
++	image = models.ImageField(upload_to=image_upload_to_featured)
++	title = models.CharField(max_length=120, null=True, blank=True)
++	text = models.CharField(max_length=220, null=True, blank=True)
++	text_right = models.BooleanField(default=False)
++	text_css_color = models.CharField(max_length=6, null=True, blank=True)
++	show_price = models.BooleanField(default=False)
++	make_image_background = models.BooleanField(default=False)
++	active = models.BooleanField(default=True)
++
++	def __unicode__(self):
++		return self.product.title
+\ No newline at end of file
+
+----------------------------- templates/home.html -----------------------------
+index 39b5354..46a46f5 100644
+@@ -12,38 +12,59 @@
+ 
+ .jumbotron {
+     background-color: #5ACDFF !important;
+-    color : #F5F5F5;
++    /*color : #F5F5F5;*/
++    color : #000;
++    {% if featured_image.make_image_background %} 
++    background-image: url("{{ featured_image.image.url }}");
++    background-repeat: no-repeat;
++    background-color: #000;
++    background-size: cover; /*stretch to adapt screen*/
++    background-position-y: -272px;
++    {% endif %}    
+ }
+ {% endblock %}
+ </style>
+ 
+ {% block jumbotron %}
+ {% if not request.user.is_authenticated%}
+-<!-- Main component for a primary marketing message or call to action -->
+-<div class="jumbotron">
+-<div class="container">
+-  <div class="row">
+-    <div class="col-sm-6">
+-        <h1>Try Django1.8</h1>
+-        <p>The MVP Landing project is designed to get your project started. The goal is to help you launch as soon as possible with the least amount of investment using time or money. Join Us today.</p>
+-        <p>To see the difference between static and fixed top navbars, just scroll.</p>
+-        <p>
+-          <a class="btn btn-lg btn-primary" href="" role="button">Join us &raquo;</a>
+-        </p>
+-    </div>
+-<!--     <div class="col-sm-6" style="background-color:black;min-height:300px;"> -->
+-          <!--
+-          <div class='col-sm-6' >
+-                <iframe width="560" height="315" src="http://v.youku.com/v_show/id_XMTQyMjMzNjQ2OA==.html" frameborder="0" allowfullscreen></iframe>
+-          </div>
+-          -->
+-          <div class='col-sm-6 video'>
+-              <embed width="560" height="315"  src="http://player.youku.com/player.php/Type/Folder/Fid/26679028/Ob/1/sid/XMTQ2Nzg5NjM4NA==/v.swf" quality="high" width="480" height="400" align="middle" allowScriptAccess="always" allowFullScreen="true" mode="transparent" type="application/x-shockwave-flash"></embed>
+-          </div>
++    {% if featured_image %} 
++    <div class="jumbotron">
++        <div class="container">
++            <div class="row">
++                <div class='{% if featured_image.make_image_background %} col-sm-12 {% else %} col-sm-6 {% endif %} text-center {% if featured_image.text_right %} pull-right {% endif %}'>
++                    <h1>{{ featured_image.product.title }}</h1>
++                    <p>{{ featured_image.product.description }}</p>
++                    <p>
++                        <a class="btn btn-lg btn-primary" href="{{ featured_image.product.get_absolute_url }}" role="button">More Details &raquo;</a>
++                    </p>
++                </div>
++                {% if not featured_image.make_image_background %} 
++                <div class='col-sm-6'>
++                    <img src="{{ featured_image.image.url }}" class="img-responsive" />
++                </div>
++                {% endif %}
++            </div>
++        </div>
++    </div>    
++    {% else %}
++    <div class="jumbotron">
++        <div class="container">
++            <div class="row">
++                <div class="col-sm-6">
++                    <h1>Try Django1.8</h1>
++                    <p>The MVP Landing project is designed to get your project started. The goal is to help you launch as soon as possible with the least amount of investment using time or money. Join Us today.</p>
++                    <p>To see the difference between static and fixed top navbars, just scroll.</p>
++                    <p>
++                        <a class="btn btn-lg btn-primary" href="" role="button">Join us &raquo;</a>
++                    </p>
++                </div>
++                <div class='col-sm-6 video'>
++                    <embed width="560" height="315"  src="http://player.youku.com/player.php/Type/Folder/Fid/26679028/Ob/1/sid/XMTQ2Nzg5NjM4NA==/v.swf" quality="high" width="480" height="400" align="middle" allowScriptAccess="always" allowFullScreen="true" mode="transparent" type="application/x-shockwave-flash"></embed>
++                </div>
++            </div>
++        </div>
+     </div>
+-  </div>
+-</div>
+-</div>
++    {% endif %}
+ {% endif %}
+ {% endblock %}
 
 
