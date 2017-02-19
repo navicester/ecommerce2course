@@ -1586,6 +1586,10 @@ def home(request):
 {% endblock %}
 ```
 
+![](static_in_pro/media/F032_Homepage_wo_featureproductbg.png)
+带背景的
+![](static_in_pro/media/F032_Homepage_w_featureproductbg.png)
+
 # 032 Login as Dropdown Menu
 
 修改*navbar.html*
@@ -1651,6 +1655,7 @@ css中的class名字注意：
 col_class_set OK  
 col-class-set KO  
 
+> 
 <pre>
 #       modified:   newsletter/views.py
 #       modified:   products/templates/products/product_list.html
