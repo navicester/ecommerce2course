@@ -29,4 +29,52 @@
     display:none;
 }
 
+/*@screen-xs-max: 767px;*/
+/*@screen-sm-min : 758px;*/
+/*@screen-sm-max : 991px;*/
+/*@screen-md-min : 992px;*/
+/*@screen-md-max : 1119px;*/
+/*@screen-lg-min : 1200px;*/
 
+@media (max-width: 767px){
+    .display_single{
+        display: block;
+    }
+}
+/*@media (min-width: @screen-sm-min) and (max-width: @screen-sm-max) { .row2{background-color: green;  }}*/
+/*@media (min-width: @screen-md-min) and (max-width: @screen-md-max) { background-color: black;  }*/
+@media (min-width: 768px) {
+    .display_single {
+        display: none;
+    }
+
+
+/*height vs line-height styling
+
+"height" is the vertical measurement of the container.
+
+"line-height" is the distance from the top of the first line of text to the top of the second.
+
+If used with only one line of text I'd expect them to produce similar results in most cases.
+
+I use height when I want to explicitly set the container size and line-height for typographic layout, where it might be relevant if the user resizes the text.
+*/
+    .img-center {
+        /*display:table-cell;*/
+        vertical-align:middle;
+        text-align:center;
+
+        height: 150px;
+        line-height: 150px; /*very important for center*/
+        border: solid 1px #e7e7eb;
+    }
+
+    .img-center img.img-responsive{
+        /*height: 100px!important;
+        width: auto!important;
+        max-width: 100%!important;*/
+        max-height: 100%!important;
+        vertical-align: middle!important;
+        display: inline-block!important;  /*very important for IE display */
+    }
+}
